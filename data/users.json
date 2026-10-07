@@ -1,0 +1,23 @@
+[
+  {
+    "id": "usr-01",
+    "nom": "Éphraïm Kambale",
+    "email": "tresorier@eglisabunia.cd",
+    "telephone": "+243 990 000 001",
+    "role": "tresorier",
+    "motDePasseHash": "$2b$10$koW4PrfTUGQzttrZdByNGOzRwXKI9FnUrnb2.N2EQitEMVS45WmQO",
+    "creeLe": "2026-01-05T08:00:00.000Z",
+    "source": "local"
+  },
+  {
+    "id": "usr-02",
+    "nom": "Jean Kabeya Mwamba",
+    "email": "jean@exemple.cd",
+    "telephone": "+243 990 123 456",
+    "role": "membre",
+    "motDePasseHash": "$2b$10$jKmxrdTJt5VzR1osj7PCtuBh4MCMwviJ2tx42XjS6L7SUNOLPoR0i",
+    "donateurId": "don-01",
+    "creeLe": "2026-01-10T08:00:00.000Z",
+    "source": "local"
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "proj-01",
+    "nom": "Construction du nouveau temple",
+    "description": "Édification d'un temple moderne pouvant accueillir 1 200 fidèles, avec salles de catéchisme et un local administratif.",
+    "objectif": 80000,
+    "collecte": 32500,
+    "statut": "en_cours",
+    "dateDebut": "2026-02-01"
+  },
+  {
+    "id": "proj-02",
+    "nom": "Forage d'eau potable",
+    "description": "Perçage d'un forage et installation d'une pompe à motricité humaine pour le quartier et l'église.",
+    "objectif": 15000,
+    "collecte": 9800,
+    "statut": "en_cours",
+    "dateDebut": "2026-04-01"
+  },
+  {
+    "id": "proj-03",
+    "nom": "Soutien à l'orphelinat de Bunia",
+    "description": "Prise en charge alimentaire, scolaire et sanitaire des enfants accueillis à l'orphelinat.",
+    "objectif": 25000,
+    "collecte": 11400,
+    "statut": "en_cours",
+    "dateDebut": "2026-01-15"
+  },
+  {
+    "id": "proj-04",
+    "nom": "Équipement de l'école du dimanche",
+    "description": "Achat de tables, chaises, tableaux et manuels pour les classes de l'école du dimanche.",
+    "objectif": 8000,
+    "collecte": 8000,
+    "statut": "termine",
+    "dateDebut": "2025-11-01"
+  },
+  {
+    "id": "proj-05",
+    "nom": "Rénovation de la salle paroissiale",
+    "description": "Réfection de la toiture et de l'électricité de la salle paroissiale avant la saison des pluies.",
+    "objectif": 12000,
+    "collecte": 0,
+    "statut": "planifie",
+    "dateDebut": "2026-11-01"
+  }
+]
