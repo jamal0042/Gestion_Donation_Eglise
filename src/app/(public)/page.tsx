@@ -36,7 +36,7 @@ export default function Page() {
               <span className="text-gold-400">avec transparence</span>.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-brand-100">
-              L&apos;Église de Bunia centralise la collecte des dîmes, offrandes
+              L&apos;Église Adventiste Bunia ville centralise la collecte des dîmes, offrandes
               et dons. Chaque contribution reçoit un reçu officiel, chaque
               projet avance sous le regard de la communauté.
             </p>

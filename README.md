@@ -34,6 +34,14 @@ Ouvrez [http://localhost:3000](http://localhost:3000).
 - **Trésorier** (`/tresorier`) : tableau de bord (totaux, tendances), gestion des opérations (recherche, filtres par type/méthode/projet/donateur/période, export CSV, bénéficiaire auto si cadeau), gestion des donateurs et des projets, et générateur de QR codes redirigeant vers l'offrande.
 - **Reçus** : chaque opération dispose d'un reçu officiel imprimable (`/recu/[id]`), avec montant en toutes lettres et fenêtre « Imprimer ».
 
+## Installation comme application (PWA)
+
+L'application est installable sur Android, iOS, Windows et macOS : ouvrez le site puis « Installer l'application » (une icône est ajoutée au bureau / écran d'accueil). Un service worker (`public/sw.js`) assure un démarrage rapide et un affichage de secours hors-ligne.
+
+- Manifeste : `src/app/manifest.ts`
+- Icônes et écrans de démarrage : `public/icons/` (régénérer avec `powershell -ExecutionPolicy Bypass -File scripts/generate-icons.ps1`)
+- Remplacez les fichiers de `public/icons/` par votre logo officiel quand vous l'aurez.
+
 ## Stockage
 
 Prototype local : données JSON sous `data/` (`operations.json`, `donateurs.json`, `projets.json`, `users.json`, `resets.json`). Pensez à migrer vers une base de données en production.
