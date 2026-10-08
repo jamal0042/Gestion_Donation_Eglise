@@ -52,5 +52,12 @@
     "telephone": "+243 997 890 123",
     "email": "alice@exemple.cd",
     "creeLe": "2026-04-12T08:00:00.000Z"
+  },
+  {
+    "nom": "jamal faraja",
+    "telephone": "+243992720042",
+    "email": "admin@biblius.fr",
+    "id": "16612b67-2df5-4d2e-891d-7b11e356acdd",
+    "creeLe": "2026-10-08T12:01:40.535Z"
   }
 ]

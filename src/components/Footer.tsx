@@ -24,11 +24,20 @@ export function Footer() {
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-600 text-white">
                 <Church size={18} />
               </span>
-              Église de Bunia
+              <span className="leading-tight">
+                Église adventiste du 7<sup>e</sup> jour
+                <span className="block text-[10px] font-semibold uppercase tracking-widest text-brand-300">
+                  Bunia ville, Ituri
+                </span>
+              </span>
             </div>
             <p className="mt-4 text-sm leading-relaxed">
               « Que chacun donne comme il l&apos;a résolu en son cœur. » — 2
               Corinthiens 9:7
+            </p>
+            <p className="mt-3 text-sm leading-relaxed">
+              Une communauté adventiste locale, attachée à la fidélité, à la
+              transparence et au service de notre quartier.
             </p>
             <div className="mt-5 flex gap-2">
               {RESEAUX.map((r) => (
@@ -62,18 +71,22 @@ export function Footer() {
             <h4 className="text-sm font-bold uppercase tracking-wider text-white">
               Contact
             </h4>
-            <ul className="mt-4 space-y-3 text-sm">
+<ul className="mt-4 space-y-3 text-sm">
               <li className="flex items-start gap-2">
-                <MapPin size={16} className="mt-0.5 shrink-0 text-brand-400" />
-                <span>Avenue de la Paix n° 12, Bunia, RDC</span>
+                <Clock size={16} className="mt-0.5 shrink-0 text-brand-400" />
+                <span>
+                  <strong className="font-semibold text-white">Samedi (sabbat)</strong>
+                  <br />
+                  École du sabbat 09h00 · Culte d&apos;adoration 10h30
+                </span>
               </li>
               <li className="flex items-center gap-2">
-                <Phone size={16} className="shrink-0 text-brand-400" />
-                <span>+243 990 000 001</span>
+                <Clock size={16} className="shrink-0 text-brand-400" />
+                <span>Vendredi : ouverture du sabbat (coucher du soleil)</span>
               </li>
               <li className="flex items-center gap-2">
-                <Mail size={16} className="shrink-0 text-brand-400" />
-                <span>contact@eglisabunia.cd</span>
+                <Clock size={16} className="shrink-0 text-brand-400" />
+                <span>Mercredi : réunion de prière, 17h30</span>
               </li>
             </ul>
           </div>
@@ -100,8 +113,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-slate-800 pt-6 text-xs text-slate-500">
-          © Église de Bunia — Application de gestion de la trésorerie. Tous droits
-          réservés.
+          © Église adventiste du septième jour — Bunia ville (Ituri, RDC). Application de gestion de la trésorerie. Tous droits réservés.
         </div>
       </div>
     </footer>

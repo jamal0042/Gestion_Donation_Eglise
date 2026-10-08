@@ -19,5 +19,16 @@
     "donateurId": "don-01",
     "creeLe": "2026-01-10T08:00:00.000Z",
     "source": "local"
+  },
+  {
+    "nom": "jamal faraja",
+    "email": "malembefaraja@gmail.com",
+    "telephone": "+243992720042",
+    "role": "membre",
+    "motDePasseHash": "$2b$10$3fLeNgstXpkbw8sa4kaItuMqrK.uiU7S3UTVRSKERquMMpGMDi0vG",
+    "donateurId": "16612b67-2df5-4d2e-891d-7b11e356acdd",
+    "source": "local",
+    "id": "07480bae-4f13-416b-ad9d-2f1d39f3f3cc",
+    "creeLe": "2026-10-08T12:01:42.520Z"
   }
 ]

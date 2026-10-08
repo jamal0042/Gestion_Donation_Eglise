@@ -48,9 +48,9 @@ export function Navbar() {
             <Church size={18} />
           </span>
           <span className="leading-tight">
-            Église de Bunia
+            Église Adventiste du 7<sup>e</sup> jour
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-brand-600">
-              Trésorerie & Offrandes
+              Bunia ville
             </span>
           </span>
         </Link>

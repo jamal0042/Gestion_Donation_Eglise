@@ -36,9 +36,10 @@ export default function Page() {
               <span className="text-gold-400">avec transparence</span>.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-brand-100">
-              L&apos;Église Adventiste Bunia ville centralise la collecte des dîmes, offrandes
-              et dons. Chaque contribution reçoit un reçu officiel, chaque
-              projet avance sous le regard de la communauté.
+              L&apos;Église adventiste du septième jour de Bunia ville
+              centralise la collecte des dîmes, offrandes et dons. Chaque
+              contribution reçoit un reçu officiel, chaque projet avance sous le
+              regard de la communauté.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/offrande" className="btn btn-gold px-6 py-3 text-base">

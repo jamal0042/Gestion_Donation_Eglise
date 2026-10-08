@@ -15,16 +15,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Église de Bunia — Trésorerie & Offrandes",
-    template: "%s | Église de Bunia",
+    default: "Église adventiste du septième jour — Bunia ville | Trésorerie & Offrandes",
+    template: "%s | Église adventiste du septième jour — Bunia",
   },
   description:
-    "Plateforme de gestion de la trésorerie, des offrandes et des projets de l'Église de Bunia : faire une offrande, suivre les projets, imprimer un reçu.",
-  applicationName: "Église de Bunia",
+    "Église adventiste du septième jour — Bunia ville (Ituri, RDC). Plateforme de gestion des dîmes, offrandes, dons et projets : faire un don en ligne, obtenir un reçu officiel, suivre les projets.",
+  applicationName: "Église adventiste du septième jour — Bunia ville",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Église de Bunia",
+    title: "EASJ Bunia ville",
   },
   formatDetection: {
     telephone: false,

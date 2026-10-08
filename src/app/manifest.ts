@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Église Adventiste Bunia — Gestion de la trésorerie",
-    short_name: "SDA BuniaVille",
+    name: "Église adventiste du septième jour — Bunia ville | Trésorerie & Offrandes",
+    short_name: "EASJ Bunia",
     description:
-      "Gestion des offrandes, reçus et projets de l'Église de Bunia.",
+      "Gestion des dîmes, offrandes, dons et projets de l'Église adventiste du septième jour — Bunia ville.",
     id: "/",
     start_url: "/",
     scope: "/",
