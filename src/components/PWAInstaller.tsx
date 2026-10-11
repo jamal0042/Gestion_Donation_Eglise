@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 
@@ -41,13 +40,6 @@ export function PWAInstaller() {
 
   return (
     <div className="fixed bottom-5 right-5 z-50 flex max-w-xs items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl">
-      <Image
-        src="/icons/icon-192.png"
-        alt="Église de Bunia"
-        width={48}
-        height={48}
-        className="h-12 w-12 shrink-0 rounded-xl"
-      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-slate-900">
           Installer l&apos;application
