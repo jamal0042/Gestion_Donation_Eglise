@@ -12,10 +12,10 @@ export default function Page() {
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-700 text-white">
           <KeyRound size={24} />
         </span>
-        <h1 className="mt-4 text-3xl font-extrabold text-slate-900">
+        <h1 className="mt-4 text-3xl font-extrabold text-slate-900 dark:text-slate-100">
           Mot de passe oublié
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-300">
           Indiquez l&apos;e-mail de votre compte : nous vous enverrons un lien
           de réinitialisation.
         </p>
@@ -23,11 +23,11 @@ export default function Page() {
       <div className="card mt-8 p-6 sm:p-8">
         <ForgotForm />
       </div>
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
         Vous vous en souvenez ?{" "}
         <Link
           href="/connexion"
-          className="font-semibold text-brand-700 hover:text-brand-800"
+          className="font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200"
         >
           Se connecter
         </Link>

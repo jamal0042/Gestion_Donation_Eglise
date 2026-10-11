@@ -99,8 +99,8 @@ export function QRGenerator() {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="card p-6">
-        <h2 className="font-bold text-slate-900">Configurer le QR code</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="font-bold text-slate-900 dark:text-slate-100">Configurer le QR code</h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Générez un QR code qui mène les fidèles au formulaire d&apos;offrande,
           sans authentification.
         </p>
@@ -155,9 +155,9 @@ export function QRGenerator() {
 
           <div>
             <label className="label">Lien généré</label>
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-2">
               <Link2 size={15} className="ml-1 shrink-0 text-slate-400" />
-              <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-600">
+              <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-600 dark:text-slate-300">
                 {lien || "—"}
               </span>
               <button onClick={copier} className="btn btn-outline btn-sm shrink-0">
@@ -183,7 +183,7 @@ export function QRGenerator() {
       </div>
 
       <div className="card flex flex-col items-center justify-center p-6">
-        <h2 className="self-start font-bold text-slate-900">
+        <h2 className="self-start font-bold text-slate-900 dark:text-slate-100">
           Aperçu du QR code
         </h2>
         {image ? (
@@ -191,9 +191,9 @@ export function QRGenerator() {
             <img
               src={image}
               alt="QR code d'offrande"
-              className="mt-5 h-64 w-64 rounded-xl border border-slate-200 object-contain"
+              className="mt-5 h-64 w-64 rounded-xl border border-slate-200 dark:border-slate-800 object-contain"
             />
-            <p className="mt-5 max-w-sm text-center text-sm text-slate-500">
+            <p className="mt-5 max-w-sm text-center text-sm text-slate-500 dark:text-slate-400">
               Affichez ce QR code à l&apos;entrée de l&apos;église, dans les
               bulletins ou sur les réseaux sociaux. Un fidèle le scanne et peut
               donner en quelques secondes, sans créer de compte.

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  Church,
   Heart,
   LogOut,
   Menu,
@@ -12,6 +12,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { UtilisateurPublic } from "@/lib/api";
 
 const LIENS = [
@@ -41,15 +42,19 @@ export function Navbar() {
     user?.role === "tresorier" ? "/tresorier" : "/espace";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 font-bold text-slate-900">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-700 text-white">
-            <Church size={18} />
-          </span>
+        <Link href="/" className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
+          <Image
+            src="/logo.jpg"
+            alt="Église adventiste du septième jour — Bunia ville"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-xl object-cover ring-1 ring-black/5 dark:ring-white/10"
+          />
           <span className="leading-tight">
             Église Adventiste du 7<sup>e</sup> jour
-            <span className="block text-[10px] font-semibold uppercase tracking-widest text-brand-600">
+            <span className="block text-[10px] font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-300">
               Bunia ville
             </span>
           </span>
@@ -60,7 +65,7 @@ export function Navbar() {
             <Link
               key={l.href}
               href={l.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-brand-700"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-brand-700 dark:hover:text-brand-300"
             >
               {l.label}
             </Link>
@@ -82,7 +87,7 @@ export function Navbar() {
                 <UserRound size={16} />
                 {user.role === "tresorier" ? (
                   <>
-                    <LayoutDashboard size={15} className="text-brand-600" />
+                    <LayoutDashboard size={15} className="text-brand-600 dark:text-brand-300" />
                     Trésorerie
                   </>
                 ) : (
@@ -107,26 +112,30 @@ export function Navbar() {
               </Link>
             </>
           )}
+          <ThemeToggle />
         </div>
 
-        <button
-          onClick={() => setOuvert((v) => !v)}
-          className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 text-slate-700 md:hidden"
-          aria-label="Menu"
-        >
-          {ouvert ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            onClick={() => setOuvert((v) => !v)}
+            className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+            aria-label="Menu"
+          >
+            {ouvert ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       {ouvert && (
-        <div className="border-t border-slate-200 bg-white px-4 py-3 md:hidden">
+        <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 md:hidden">
           <nav className="flex flex-col gap-1">
             {LIENS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOuvert(false)}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 {l.label}
               </Link>

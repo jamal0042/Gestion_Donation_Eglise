@@ -81,18 +81,18 @@ export function OffrandeForm({ projetInitial }: Props) {
   if (resultat) {
     return (
       <div className="text-center">
-        <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+        <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
           <CheckCircle2 size={32} />
         </span>
-        <h2 className="mt-5 text-2xl font-extrabold text-slate-900">
+        <h2 className="mt-5 text-2xl font-extrabold text-slate-900 dark:text-slate-100">
           Merci pour votre générosité !
         </h2>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-300">
           Votre contribution de{" "}
-          <strong className="text-brand-700">{formatMontant(resultat.montant)}</strong> a
+          <strong className="text-brand-700 dark:text-brand-300">{formatMontant(resultat.montant)}</strong> a
           bien été enregistrée.
         </p>
-        <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-brand-50 px-5 py-2 font-mono text-sm font-bold text-brand-700">
+        <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/15 px-5 py-2 font-mono text-sm font-bold text-brand-700 dark:text-brand-300">
           Reçu n° {resultat.numeroRecu}
         </div>
         <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3">
@@ -205,7 +205,7 @@ export function OffrandeForm({ projetInitial }: Props) {
               className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
                 montant === m
                   ? "border-brand-600 bg-brand-600 text-white"
-                  : "border-slate-300 text-slate-600 hover:border-brand-400"
+                  : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-brand-400"
               }`}
             >
               ${m}
@@ -244,7 +244,7 @@ export function OffrandeForm({ projetInitial }: Props) {
         />
       </div>
 
-      <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-4">
+      <div className="rounded-xl border border-brand-100 dark:border-brand-500/30 bg-brand-50/50 dark:bg-brand-500/10 p-4">
         <label className="flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
@@ -252,7 +252,7 @@ export function OffrandeForm({ projetInitial }: Props) {
             onChange={(e) => setCreerCompte(e.target.checked)}
             className="mt-1 h-4 w-4 accent-brand-600"
           />
-          <span className="text-sm text-slate-700">
+          <span className="text-sm text-slate-700 dark:text-slate-300">
             <strong>Créer mon espace donateur</strong> — suivez vos dons,
             retrouvez vos reçus et participez aux projets. Un compte sécurisé
             sera créé pour vous.
@@ -282,7 +282,7 @@ export function OffrandeForm({ projetInitial }: Props) {
       </div>
 
       {erreur && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+        <p className="rounded-lg bg-red-50 dark:bg-red-500/15 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
           {erreur}
         </p>
       )}

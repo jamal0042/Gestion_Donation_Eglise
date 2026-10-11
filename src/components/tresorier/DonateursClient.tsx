@@ -43,8 +43,8 @@ export function DonateursClient() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Donateurs</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Donateurs</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {donateurs
               ? `${filtres.length} donateur${filtres.length > 1 ? "s" : ""} · ${formatMontant(
                   filtres.reduce((s, d) => s + d.total, 0)
@@ -91,29 +91,29 @@ export function DonateursClient() {
                     <tr key={d.id}>
                       <td>
                         <div className="flex items-center gap-3">
-                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-50 dark:bg-brand-500/15 text-brand-600 dark:text-brand-300">
                             <Users size={15} />
                           </span>
                           <div>
-                            <p className="font-semibold text-slate-800">{d.nom}</p>
+                            <p className="font-semibold text-slate-800 dark:text-slate-200">{d.nom}</p>
                             <p className="text-xs text-slate-400">
                               Donateur depuis {formatDateCourte(d.creeLe)}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="text-slate-500">
+                      <td className="text-slate-500 dark:text-slate-400">
                         {d.telephone && <p className="whitespace-nowrap">{d.telephone}</p>}
                         {d.email && <p className="whitespace-nowrap">{d.email}</p>}
                         {!d.telephone && !d.email && <span className="text-slate-300">—</span>}
                       </td>
-                      <td className="text-right font-semibold text-slate-700">
+                      <td className="text-right font-semibold text-slate-700 dark:text-slate-300">
                         {d.nbOperations}
                       </td>
-                      <td className="text-right font-bold text-slate-900">
+                      <td className="text-right font-bold text-slate-900 dark:text-slate-100">
                         {formatMontant(d.total)}
                       </td>
-                      <td className="whitespace-nowrap text-slate-500">
+                      <td className="whitespace-nowrap text-slate-500 dark:text-slate-400">
                         {d.dernierDon ? formatDateCourte(d.dernierDon) : "—"}
                       </td>
                       <td className="text-right">

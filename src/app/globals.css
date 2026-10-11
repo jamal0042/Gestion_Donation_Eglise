@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
@@ -20,10 +22,33 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 body {
   background-color: #f8fafc;
   color: #0f172a;
   font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body {
+  background-color: #020617;
+  background-image:
+    radial-gradient(55rem 55rem at 100% -10%, rgb(79 70 229 / 0.18), transparent 60%),
+    radial-gradient(45rem 45rem at -10% 110%, rgb(245 158 11 / 0.1), transparent 55%);
+  background-attachment: fixed;
+  color: #e2e8f0;
+}
+
+::selection {
+  background-color: var(--color-brand-500);
+  color: #fff;
 }
 
 h1,
@@ -195,7 +220,116 @@ h4 {
   background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-700));
 }
 
+/* ---------- Mode sombre ---------- */
+
+html.dark .btn-outline {
+  background-color: #0f172a;
+  border-color: #1e293b;
+  color: #e2e8f0;
+}
+
+html.dark .btn-outline:hover:not(:disabled) {
+  border-color: var(--color-brand-400);
+  color: var(--color-brand-300);
+}
+
+html.dark .btn-ghost {
+  color: #cbd5e1;
+}
+
+html.dark .btn-ghost:hover:not(:disabled) {
+  background-color: #1e293b;
+  color: #fff;
+}
+
+html.dark .card {
+  background-color: #0f172a;
+  border-color: #1e293b;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+html.dark .label {
+  color: #cbd5e1;
+}
+
+html.dark .input,
+html.dark .select,
+html.dark .textarea {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+html.dark .input::placeholder,
+html.dark .textarea::placeholder {
+  color: #64748b;
+}
+
+html.dark .input:focus,
+html.dark .select:focus,
+html.dark .textarea:focus {
+  border-color: var(--color-brand-400);
+  box-shadow: 0 0 0 3px rgb(129 140 248 / 0.22);
+}
+
+html.dark select.select option {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+html.dark .table-base th {
+  background-color: #0f172a;
+  color: #94a3b8;
+  border-bottom-color: #1e293b;
+}
+
+html.dark .table-base td {
+  border-bottom-color: #1e293b;
+  color: #cbd5e1;
+}
+
+html.dark .table-base tbody tr:hover {
+  background-color: rgb(30 41 59 / 0.5);
+}
+
+html.dark .progress-track {
+  background-color: #1e293b;
+}
+
+html.dark .chip {
+  color-scheme: dark;
+}
+
+html {
+  scrollbar-color: #94a3b8 transparent;
+}
+
+html.dark {
+  scrollbar-color: #334155 transparent;
+}
+
+@keyframes theme-apparition {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-apparition {
+  animation: theme-apparition 0.35s ease;
+}
+
 @media print {
+  html.dark body {
+    background: #fff !important;
+    background-image: none !important;
+    color: #000 !important;
+  }
+
   body * {
     visibility: hidden !important;
   }

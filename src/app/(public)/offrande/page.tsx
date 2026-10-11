@@ -16,21 +16,21 @@ export default function Page({
         <span className="grid mx-auto h-14 w-14 place-items-center rounded-2xl bg-brand-700 text-white">
           <QrCode size={26} />
         </span>
-        <h1 className="mt-4 text-3xl font-extrabold text-slate-900 sm:text-4xl">
+        <h1 className="mt-4 text-3xl font-extrabold text-slate-900 dark:text-slate-100 sm:text-4xl">
           Faire une offrande
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-slate-600">
+        <p className="mx-auto mt-3 max-w-xl text-slate-600 dark:text-slate-300">
           Aucune connexion n&apos;est requise : vous pouvez donner en toute
           confiance grâce au QR code de l&apos;église. Vous recevrez un reçu
           officiel immédiatement.
         </p>
-        <div className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-500">
+        <div className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
           <span className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-brand-600" />
+            <ShieldCheck size={16} className="text-brand-600 dark:text-brand-300" />
             Données sécurisées
           </span>
           <span className="flex items-center gap-2">
-            <Printer size={16} className="text-brand-600" />
+            <Printer size={16} className="text-brand-600 dark:text-brand-300" />
             Reçu officiel imprimable
           </span>
         </div>

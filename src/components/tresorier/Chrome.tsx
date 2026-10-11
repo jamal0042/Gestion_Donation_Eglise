@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ChartPie,
-  Church,
   Heart,
   LogOut,
   Menu,
@@ -16,6 +16,7 @@ import {
   FolderKanban,
   X,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { UtilisateurPublic } from "@/lib/api";
 
 const NAV = [
@@ -70,9 +71,13 @@ function ChromeInterne({ children }: { children: React.ReactNode }) {
       >
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-bold text-white">
-            <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500 text-white">
-              <Church size={18} />
-            </span>
+            <Image
+              src="/logo.jpg"
+              alt="Église adventiste du septième jour — Bunia ville"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-xl object-cover ring-1 ring-white/15"
+            />
             <span className="leading-tight">
               Église de Bunia
               <span className="block text-[10px] font-semibold uppercase tracking-widest text-brand-300">
@@ -145,22 +150,23 @@ function ChromeInterne({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/85 px-4 backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setOuvert(true)}
-              className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 text-slate-700 lg:hidden"
+              className="grid h-10 w-10 place-items-center rounded-lg border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 lg:hidden"
               aria-label="Ouvrir le menu"
             >
               <Menu size={18} />
             </button>
-            <p className="hidden text-sm text-slate-500 sm:block">
+            <p className="hidden text-sm text-slate-500 dark:text-slate-400 sm:block">
               Espace
-              <span className="font-semibold text-slate-800"> trésorier</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200"> trésorier</span>
             </p>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span className="hidden font-semibold text-slate-700 sm:block">
+            <ThemeToggle />
+            <span className="hidden font-semibold text-slate-700 dark:text-slate-300 sm:block">
               {user?.nom ?? ""}
             </span>
             <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-700 text-xs font-bold text-white">

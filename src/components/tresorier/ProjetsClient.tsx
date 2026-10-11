@@ -7,9 +7,9 @@ import { LIBELLES_STATUT } from "@/lib/types";
 import { formatMontant } from "@/lib/format";
 
 const COULEURS_STATUT: Record<StatutProjet, string> = {
-  en_cours: "bg-brand-100 text-brand-700",
-  termine: "bg-emerald-100 text-emerald-700",
-  planifie: "bg-amber-100 text-amber-700",
+  en_cours: "bg-brand-100 dark:bg-brand-500/25 text-brand-700 dark:text-brand-300",
+  termine: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300",
+  planifie: "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300",
 };
 
 const VIDE: Omit<Projet, "id"> = {
@@ -56,8 +56,8 @@ export function ProjetsClient() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Projets</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">Projets</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Gérez les projets de l&apos;église et leur progression financière.
           </p>
         </div>
@@ -80,31 +80,31 @@ export function ProjetsClient() {
             return (
               <div key={p.id} className="card flex flex-col p-6">
                 <div className="flex items-start justify-between gap-2">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 dark:bg-brand-500/15 text-brand-600 dark:text-brand-300">
                     <Rocket size={20} />
                   </span>
                   <span className={`chip ${COULEURS_STATUT[p.statut]}`}>
                     {LIBELLES_STATUT[p.statut]}
                   </span>
                 </div>
-                <h3 className="mt-3 font-bold text-slate-900">{p.nom}</h3>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600">
+                <h3 className="mt-3 font-bold text-slate-900 dark:text-slate-100">{p.nom}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                   {p.description}
                 </p>
                 <div className="mt-4">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-bold text-brand-700">
+                    <span className="font-bold text-brand-700 dark:text-brand-300">
                       {formatMontant(p.collecte)}
                     </span>
-                    <span className="flex items-center gap-1 text-slate-500">
-                      <TrendingUp size={14} className="text-brand-500" />
+                    <span className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                      <TrendingUp size={14} className="text-brand-500 dark:text-brand-300" />
                       {pct}%
                     </span>
                   </div>
                   <div className="progress-track mt-2">
                     <div className="progress-fill" style={{ width: `${pct}%` }} />
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                     Objectif : {formatMontant(p.objectif)}
                   </p>
                 </div>
@@ -181,16 +181,16 @@ function ProjetModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
       <form
         onSubmit={soumettre}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 p-6"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
             {id ? "Modifier le projet" : "Nouveau projet"}
           </h2>
           <button
             type="button"
             onClick={onFermer}
-            className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100"
+            className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -267,7 +267,7 @@ function ProjetModal({
             </select>
           </div>
           {erreur && (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            <p className="rounded-lg bg-red-50 dark:bg-red-500/15 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
               {erreur}
             </p>
           )}

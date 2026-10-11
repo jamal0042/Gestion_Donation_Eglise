@@ -32,7 +32,7 @@ export function StatsBandeau() {
     return (
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-200" />
+          <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-700" />
         ))}
       </div>
     );
@@ -44,15 +44,15 @@ export function StatsBandeau() {
         return (
           <div
             key={el.cle}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm"
           >
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-50 dark:bg-brand-500/15 text-brand-600 dark:text-brand-300">
                 <el.icone size={18} />
               </span>
-              <p className="text-xs font-medium text-slate-500">{el.label}</p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{el.label}</p>
             </div>
-            <p className="mt-3 text-2xl font-extrabold text-slate-900">
+            <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               {el.cle.startsWith("total")
                 ? formatMontant(valeur)
                 : valeur.toLocaleString("fr-FR")}

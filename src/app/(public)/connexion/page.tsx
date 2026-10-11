@@ -17,10 +17,10 @@ export default function Page({
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-700 text-white">
           <Lock size={24} />
         </span>
-        <h1 className="mt-4 text-3xl font-extrabold text-slate-900">
+        <h1 className="mt-4 text-3xl font-extrabold text-slate-900 dark:text-slate-100">
           Bon retour parmi nous
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-300">
           Connectez-vous pour accéder à votre espace donateur.
         </p>
       </div>
@@ -30,19 +30,19 @@ export default function Page({
         </Suspense>
       </div>
       <div className="mt-6 space-y-3 text-center text-sm">
-        <p className="text-slate-600">
+        <p className="text-slate-600 dark:text-slate-300">
           <Link
             href="/mot-de-passe-oublie"
-            className="font-semibold text-brand-700 hover:text-brand-800"
+            className="font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200"
           >
             Mot de passe oublié ?
           </Link>
         </p>
-        <p className="text-slate-600">
+        <p className="text-slate-600 dark:text-slate-300">
           Pas encore de compte ?{" "}
           <Link
             href="/inscription"
-            className="font-semibold text-brand-700 hover:text-brand-800"
+            className="font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200"
           >
             Créer un compte
           </Link>

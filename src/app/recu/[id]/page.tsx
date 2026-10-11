@@ -10,7 +10,7 @@ export default function Page({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-10">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-800 px-4 py-10">
       <div className="no-print mx-auto mb-6 flex max-w-xl items-center justify-between">
         <BackButton />
         <PrintButton />

@@ -59,7 +59,7 @@ export function LoginForm({ next, erreurGlobale }: { next: string; erreurGlobale
   return (
     <form onSubmit={soumettre} className="space-y-4">
       {erreurGlobale && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+        <p className="rounded-lg bg-red-50 dark:bg-red-500/15 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
           {erreurGlobale}
         </p>
       )}
@@ -96,7 +96,7 @@ export function LoginForm({ next, erreurGlobale }: { next: string; erreurGlobale
         />
       </div>
       {erreur && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+        <p className="rounded-lg bg-red-50 dark:bg-red-500/15 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
           {erreur}
         </p>
       )}
@@ -104,7 +104,7 @@ export function LoginForm({ next, erreurGlobale }: { next: string; erreurGlobale
         {enCours ? "Connexion…" : "Se connecter"}
       </button>
       <div className="relative py-1 text-center">
-        <span className="bg-white px-3 text-xs uppercase tracking-widest text-slate-400">
+        <span className="bg-white dark:bg-slate-900 px-3 text-xs uppercase tracking-widest text-slate-400">
           ou
         </span>
       </div>
@@ -237,7 +237,7 @@ export function RegisterForm() {
         </div>
       </div>
       {erreur && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+        <p className="rounded-lg bg-red-50 dark:bg-red-500/15 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
           {erreur}
         </p>
       )}
@@ -245,7 +245,7 @@ export function RegisterForm() {
         {enCours ? "Création…" : "Créer mon compte"}
       </button>
       <div className="relative py-1 text-center">
-        <span className="bg-white px-3 text-xs uppercase tracking-widest text-slate-400">
+        <span className="bg-white dark:bg-slate-900 px-3 text-xs uppercase tracking-widest text-slate-400">
           ou
         </span>
       </div>
@@ -282,18 +282,18 @@ export function ForgotForm() {
   if (message) {
     return (
       <div className="space-y-4 text-center">
-        <p className="rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-800">
+        <p className="rounded-lg bg-brand-50 dark:bg-brand-500/15 px-4 py-3 text-sm text-brand-800 dark:text-brand-200">
           {message}
         </p>
         {lien && (
-          <div className="rounded-xl border border-dashed border-brand-300 bg-brand-50/50 p-4 text-left">
-            <p className="text-xs font-semibold text-brand-600">
+          <div className="rounded-xl border border-dashed border-brand-300 dark:border-brand-400 bg-brand-50/50 dark:bg-brand-500/10 p-4 text-left">
+            <p className="text-xs font-semibold text-brand-600 dark:text-brand-300">
               Serveur e-mail non configuré : voici votre lien de
               réinitialisation (en production, il est envoyé par e-mail).
             </p>
             <a
               href={lien}
-              className="mt-2 block break-all font-mono text-sm font-bold text-brand-700 underline"
+              className="mt-2 block break-all font-mono text-sm font-bold text-brand-700 dark:text-brand-300 underline"
             >
               {lien}
             </a>
@@ -401,7 +401,7 @@ export function ResetForm({ token }: { token: string }) {
         </div>
       </div>
       {erreur && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+        <p className="rounded-lg bg-red-50 dark:bg-red-500/15 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
           {erreur}
         </p>
       )}

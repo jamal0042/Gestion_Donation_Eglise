@@ -1,11 +1,6 @@
 import Link from "next/link";
-import {
-  Church,
-  Clock,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import Image from "next/image";
+import { Clock } from "lucide-react";
 
 const RESEAUX = [
   { nom: "Facebook", initiale: "f" },
@@ -16,14 +11,18 @@ const RESEAUX = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-900 text-slate-300">
+    <footer className="border-t border-slate-200 dark:border-slate-800 bg-slate-900 text-slate-300">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
             <div className="flex items-center gap-2 font-bold text-white">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-600 text-white">
-                <Church size={18} />
-              </span>
+              <Image
+                src="/logo.jpg"
+                alt="Église adventiste du septième jour — Bunia ville"
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-xl object-cover ring-1 ring-white/10"
+              />
               <span className="leading-tight">
                 Église adventiste du 7<sup>e</sup> jour
                 <span className="block text-[10px] font-semibold uppercase tracking-widest text-brand-300">
@@ -112,7 +111,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-slate-800 pt-6 text-xs text-slate-500">
+        <div className="mt-12 border-t border-slate-800 pt-6 text-xs text-slate-500 dark:text-slate-400">
           © Église adventiste du septième jour — Bunia ville (Ituri, RDC). Application de gestion de la trésorerie. Tous droits réservés.
         </div>
       </div>

@@ -130,13 +130,13 @@ export default function Page() {
       {/* Identité */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
-          <span className="text-xs font-bold uppercase tracking-widest text-brand-600">
+          <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-300">
             Qui sommes-nous
           </span>
-          <h2 className="mt-3 text-2xl font-extrabold text-slate-900 sm:text-3xl">
+          <h2 className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-slate-100 sm:text-3xl">
             Comprendre notre nom
           </h2>
-          <p className="mt-4 leading-relaxed text-slate-600">
+          <p className="mt-4 leading-relaxed text-slate-600 dark:text-slate-300">
             Les adventistes du septième jour sont très attachés aux principes de
             la liberté de conscience, dans le respect de l&apos;ordre public et
             de la dignité de la personne, ainsi qu&apos;à la séparation des
@@ -149,11 +149,11 @@ export default function Page() {
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {IDENTITE.map((i) => (
             <div key={i.titre} className="card p-6">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 dark:bg-brand-500/15 text-brand-600 dark:text-brand-300">
                 <i.icone size={20} />
               </span>
-              <h3 className="mt-4 font-bold text-slate-900">{i.titre}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              <h3 className="mt-4 font-bold text-slate-900 dark:text-slate-100">{i.titre}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 {i.texte}
               </p>
             </div>
@@ -162,35 +162,35 @@ export default function Page() {
       </section>
 
       {/* Histoire mondiale + locale */}
-      <section className="bg-slate-50 py-16">
+      <section className="bg-slate-50 dark:bg-slate-900/60 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="text-xs font-bold uppercase tracking-widest text-brand-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-300">
               Notre histoire
             </span>
-            <h2 className="mt-3 text-2xl font-extrabold text-slate-900 sm:text-3xl">
+            <h2 className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-slate-100 sm:text-3xl">
               D&apos;un réveil mondial à Bunia
             </h2>
-            <p className="mt-4 leading-relaxed text-slate-600">
+            <p className="mt-4 leading-relaxed text-slate-600 dark:text-slate-300">
               Notre identité s&apos;enracine dans un mouvement de réveil du
               XIX<sup>e</sup> siècle, aujourd&apos;hui présent sur toute la
               terre — et particulièrement dans notre ville de Bunia.
             </p>
           </div>
 
-          <ol className="mt-10 space-y-6 border-l-2 border-brand-200 pl-6 sm:pl-8">
+          <ol className="mt-10 space-y-6 border-l-2 border-brand-200 dark:border-brand-500/40 pl-6 sm:pl-8">
             {HISTOIRE.map((e) => (
               <li key={e.annee} className="relative">
                 <span className="absolute -left-[35px] top-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-brand-600 sm:-left-[43px]">
                   <span className="h-1.5 w-1.5 rounded-full bg-white" />
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-gold-600">
+                <span className="text-xs font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
                   {e.annee}
                 </span>
-                <h3 className="mt-1 text-lg font-bold text-slate-900">
+                <h3 className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">
                   {e.titre}
                 </h3>
-                <p className="mt-1 leading-relaxed text-slate-600">
+                <p className="mt-1 leading-relaxed text-slate-600 dark:text-slate-300">
                   {e.texte}
                 </p>
               </li>
@@ -199,13 +199,13 @@ export default function Page() {
               <span className="absolute -left-[35px] top-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-gold-500 sm:-left-[43px]">
                 <span className="h-1.5 w-1.5 rounded-full bg-white" />
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider text-gold-600">
+              <span className="text-xs font-bold uppercase tracking-wider text-gold-600 dark:text-gold-400">
                 Aujourd&apos;hui
               </span>
-              <h3 className="mt-1 text-lg font-bold text-slate-900">
+              <h3 className="mt-1 text-lg font-bold text-slate-900 dark:text-slate-100">
                 L&apos;Église adventiste de Bunia ville
               </h3>
-              <p className="mt-1 leading-relaxed text-slate-600">
+              <p className="mt-1 leading-relaxed text-slate-600 dark:text-slate-300">
                 Née d&apos;un petit groupe de familles réunies pour la prière,
                 notre église de Bunia, dans la province de l&apos;Ituri, est
                 portée par une communauté vivante et engagée.
@@ -225,29 +225,29 @@ export default function Page() {
       {/* Valeurs */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
-          <span className="text-xs font-bold uppercase tracking-widest text-brand-600">
+          <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-300">
             Nos engagements
           </span>
-          <h2 className="mt-3 text-2xl font-extrabold text-slate-900 sm:text-3xl">
+          <h2 className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-slate-100 sm:text-3xl">
             Les valeurs qui guident notre service
           </h2>
         </div>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {VALEURS.map((v) => (
             <div key={v.titre} className="card p-6">
-              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 dark:bg-brand-500/15 text-brand-600 dark:text-brand-300">
                 <v.icone size={20} />
               </span>
-              <h3 className="mt-4 font-bold text-slate-900">{v.titre}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              <h3 className="mt-4 font-bold text-slate-900 dark:text-slate-100">{v.titre}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 {v.texte}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-brand-100 bg-brand-50 p-5 text-sm text-brand-900">
-          <Scale size={18} className="mt-0.5 shrink-0 text-brand-600" />
+        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-brand-100 dark:border-brand-500/30 bg-brand-50 dark:bg-brand-500/15 p-5 text-sm text-brand-900">
+          <Scale size={18} className="mt-0.5 shrink-0 text-brand-600 dark:text-brand-300" />
           <p>
             Notre communauté est attachée à la défense de la liberté de
             conscience et à la séparation des Églises et de l&apos;État, dans le
@@ -257,13 +257,13 @@ export default function Page() {
       </section>
 
       {/* Objectifs */}
-      <section className="bg-slate-50 py-16">
+      <section className="bg-slate-50 dark:bg-slate-900/60 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="text-xs font-bold uppercase tracking-widest text-brand-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-300">
               Nos objectifs
             </span>
-            <h2 className="mt-3 text-2xl font-extrabold text-slate-900 sm:text-3xl">
+            <h2 className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-slate-100 sm:text-3xl">
               Où nous allons ensemble
             </h2>
           </div>
@@ -273,8 +273,8 @@ export default function Page() {
                 <span className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-700 text-white">
                   <o.icone size={22} />
                 </span>
-                <h3 className="mt-4 font-bold text-slate-900">{o.titre}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                <h3 className="mt-4 font-bold text-slate-900 dark:text-slate-100">{o.titre}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                   {o.texte}
                 </p>
               </div>

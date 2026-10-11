@@ -73,7 +73,7 @@ export default function Page() {
       </section>
 
       <section className="relative mx-auto -mt-10 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xl sm:p-8">
           <StatsBandeau />
         </div>
       </section>
@@ -81,13 +81,13 @@ export default function Page() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-brand-600">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-300">
               Notre mission
             </span>
-            <h2 className="mt-3 text-3xl font-extrabold text-slate-900">
+            <h2 className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-slate-100">
               Une église qui rend visible ce que Dieu confie
             </h2>
-            <p className="mt-5 leading-relaxed text-slate-600">
+            <p className="mt-5 leading-relaxed text-slate-600 dark:text-slate-300">
               Notre mission est d&apos;honorer Dieu par une gestion
               responsable des ressources qui Lui sont confiées. Chaque dollar
               est enregistré, reçu et affecté à un objectif précis : bâtir,
@@ -112,17 +112,17 @@ export default function Page() {
                 },
               ].map((v) => (
                 <div key={v.titre} className="card p-5">
-                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                  <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand-50 dark:bg-brand-500/15 text-brand-600 dark:text-brand-300">
                     <v.icone size={20} />
                   </span>
-                  <h3 className="mt-3 font-bold text-slate-900">{v.titre}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{v.texte}</p>
+                  <h3 className="mt-3 font-bold text-slate-900 dark:text-slate-100">{v.titre}</h3>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{v.texte}</p>
                 </div>
               ))}
             </div>
             <Link
               href="/vision"
-              className="mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
+              className="mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200"
             >
               Découvrir notre vision complète
               <ArrowRight size={15} />
@@ -155,9 +155,9 @@ export default function Page() {
                   </li>
                 </ul>
               </div>
-              <div className="flex items-center justify-between gap-3 bg-slate-50 p-5">
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Printer size={16} className="text-brand-600" />
+              <div className="flex items-center justify-between gap-3 bg-slate-50 dark:bg-slate-900/60 p-5">
+                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  <Printer size={16} className="text-brand-600 dark:text-brand-300" />
                   Reçu officiel imprimable
                 </div>
                 <Link href="/offrande" className="btn btn-primary btn-sm">
@@ -170,20 +170,20 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-20">
+      <section className="bg-slate-50 dark:bg-slate-900/60 py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-brand-600">
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-300">
                 Projets en cours
               </span>
-              <h2 className="mt-3 text-3xl font-extrabold text-slate-900">
+              <h2 className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-slate-100">
                 Ce que la communauté construit ensemble
               </h2>
             </div>
             <Link
               href="/projets"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200"
             >
               Tous les projets
               <ArrowRight size={15} />
@@ -220,8 +220,8 @@ export default function Page() {
                   <span key={i}>{s}</span>
                 ))}
               </div>
-              <p className="mt-3 text-slate-600">&laquo; {t.texte} &raquo;</p>
-              <footer className="mt-4 text-sm font-bold text-slate-900">
+              <p className="mt-3 text-slate-600 dark:text-slate-300">&laquo; {t.texte} &raquo;</p>
+              <footer className="mt-4 text-sm font-bold text-slate-900 dark:text-slate-100">
                 — {t.nom}
               </footer>
             </blockquote>

@@ -45,10 +45,10 @@ export function EspaceClient() {
             <UserRound size={26} />
           </span>
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900">
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               {user ? `Bonjour, ${user.nom.split(" ")[0]} 👋` : "Mon espace donateur"}
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Vos contributions et reçus en un seul endroit.
             </p>
           </div>
@@ -61,30 +61,30 @@ export function EspaceClient() {
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <div className="card p-5">
-          <div className="flex items-center gap-2 text-slate-500">
-            <Wallet size={16} className="text-brand-600" />
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Wallet size={16} className="text-brand-600 dark:text-brand-300" />
             <span className="text-xs font-semibold uppercase tracking-wider">
               Total donné
             </span>
           </div>
-          <p className="mt-2 text-2xl font-extrabold text-slate-900">
+          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-slate-100">
             {formatMontant(total)}
           </p>
         </div>
         <div className="card p-5">
-          <div className="flex items-center gap-2 text-slate-500">
-            <ReceiptText size={16} className="text-brand-600" />
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <ReceiptText size={16} className="text-brand-600 dark:text-brand-300" />
             <span className="text-xs font-semibold uppercase tracking-wider">
               Contributions
             </span>
           </div>
-          <p className="mt-2 text-2xl font-extrabold text-slate-900">
+          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-slate-100">
             {operations ? operations.length : "…"}
           </p>
         </div>
         <div className="card p-5">
-          <div className="flex items-center gap-2 text-slate-500">
-            <TrendingUp size={16} className="text-brand-600" />
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <TrendingUp size={16} className="text-brand-600 dark:text-brand-300" />
             <span className="text-xs font-semibold uppercase tracking-wider">
               Répartition
             </span>
@@ -92,8 +92,8 @@ export function EspaceClient() {
           <div className="mt-2 space-y-1">
             {[...parType.entries()].map(([t, montant]) => (
               <div key={t} className="flex justify-between text-sm">
-                <span className="text-slate-600">{LIBELLES_TYPE[t]}</span>
-                <span className="font-semibold text-slate-900">
+                <span className="text-slate-600 dark:text-slate-300">{LIBELLES_TYPE[t]}</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">
                   {formatMontant(montant)}
                 </span>
               </div>
@@ -103,17 +103,17 @@ export function EspaceClient() {
       </div>
 
       <div className="card mt-8 overflow-hidden">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="font-bold text-slate-900">Mes reçus</h2>
+        <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+          <h2 className="font-bold text-slate-900 dark:text-slate-100">Mes reçus</h2>
         </div>
         {operations === null ? (
           <p className="px-6 py-10 text-center text-slate-400">
             Chargement de vos contributions…
           </p>
         ) : operations.length === 0 ? (
-          <p className="px-6 py-10 text-center text-slate-500">
+          <p className="px-6 py-10 text-center text-slate-500 dark:text-slate-400">
             Vous n&apos;avez pas encore fait de contribution.{" "}
-            <Link href="/offrande" className="font-semibold text-brand-700">
+            <Link href="/offrande" className="font-semibold text-brand-700 dark:text-brand-300">
               Faire mon premier don
             </Link>
           </p>
@@ -134,12 +134,12 @@ export function EspaceClient() {
                 {operations.map((o) => (
                   <tr key={o.id}>
                     <td className="whitespace-nowrap">{formatDateCourte(o.date)}</td>
-                    <td className="font-mono text-xs font-semibold text-slate-500">
+                    <td className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
                       {o.numeroRecu}
                     </td>
                     <td>{LIBELLES_TYPE[o.type]}</td>
                     <td className="whitespace-nowrap">{LIBELLES_METHODE[o.methode]}</td>
-                    <td className="text-right font-bold text-slate-900">
+                    <td className="text-right font-bold text-slate-900 dark:text-slate-100">
                       {formatMontant(o.montant)}
                     </td>
                     <td className="text-right">

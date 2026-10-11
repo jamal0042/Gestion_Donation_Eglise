@@ -158,12 +158,12 @@ function Interieur() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
             Opérations & reçus
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {filtrees.length} résultat{filtrees.length > 1 ? "s" : ""} ·{" "}
-            <span className="font-semibold text-brand-700">
+            <span className="font-semibold text-brand-700 dark:text-brand-300">
               {formatMontant(totalFiltre)}
             </span>{" "}
             au total
@@ -332,22 +332,22 @@ function Interieur() {
                 visibles.map((o) => (
                   <tr key={o.id}>
                     <td className="whitespace-nowrap">{formatDateCourte(o.date)}</td>
-                    <td className="font-mono text-xs font-semibold text-slate-500">
+                    <td className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
                       {o.numeroRecu}
                     </td>
-                    <td className="font-medium text-slate-800">{o.donateurNom}</td>
+                    <td className="font-medium text-slate-800 dark:text-slate-200">{o.donateurNom}</td>
                     <td>
-                      <span className="chip bg-slate-100 text-slate-700">
+                      <span className="chip bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                         {LIBELLES_TYPE[o.type]}
                       </span>
                     </td>
-                    <td className="max-w-[140px] truncate text-slate-500">
+                    <td className="max-w-[140px] truncate text-slate-500 dark:text-slate-400">
                       {projets.find((p) => p.id === o.projetId)?.nom ?? "—"}
                     </td>
-                    <td className="whitespace-nowrap text-slate-500">
+                    <td className="whitespace-nowrap text-slate-500 dark:text-slate-400">
                       {LIBELLES_METHODE[o.methode]}
                     </td>
-                    <td className="text-right font-bold text-slate-900">
+                    <td className="text-right font-bold text-slate-900 dark:text-slate-100">
                       {formatMontant(o.montant)}
                     </td>
                     <td className="text-right">
@@ -377,8 +377,8 @@ function Interieur() {
         </div>
 
         {nbPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
-            <p className="text-sm text-slate-500">
+          <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-4 py-3">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Page {pageCourante} / {nbPages}
             </p>
             <div className="flex gap-1">
@@ -477,16 +477,16 @@ function AjoutModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
       <form
         onSubmit={soumettre}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 p-6"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
             Nouvelle opération
           </h2>
           <button
             type="button"
             onClick={onFermer}
-            className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100"
+            className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -582,7 +582,7 @@ function AjoutModal({
             />
           </div>
           {erreur && (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+            <p className="rounded-lg bg-red-50 dark:bg-red-500/15 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
               {erreur}
             </p>
           )}

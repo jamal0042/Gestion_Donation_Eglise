@@ -17,10 +17,10 @@ export default function Page({
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand-700 text-white">
           <KeyRound size={24} />
         </span>
-        <h1 className="mt-4 text-3xl font-extrabold text-slate-900">
+        <h1 className="mt-4 text-3xl font-extrabold text-slate-900 dark:text-slate-100">
           Nouveau mot de passe
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 text-slate-600 dark:text-slate-300">
           Choisissez un nouveau mot de passe pour votre compte.
         </p>
       </div>
@@ -29,8 +29,8 @@ export default function Page({
           <FormulaireWrapper params={params} />
         </Suspense>
       </div>
-      <p className="mt-6 text-center text-sm text-slate-600">
-        <Link href="/connexion" className="font-semibold text-brand-700 hover:text-brand-800">
+      <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
+        <Link href="/connexion" className="font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200">
           Retour à la connexion
         </Link>
       </p>
