@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const next = pathname + request.nextUrl.search;
 
-  if (pathname === "/espace" && !user) {
+  if (pathname.startsWith("/espace") && !user) {
     return NextResponse.redirect(
       new URL(`/connexion?next=${encodeURIComponent(next)}`, request.url)
     );
@@ -79,5 +79,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/tresorier/:path*", "/espace", "/connexion", "/inscription"],
+  matcher: ["/tresorier/:path*", "/espace/:path*", "/connexion", "/inscription"],
 };
+

@@ -279,6 +279,33 @@ export async function majRole(id: string, role: Role): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function majProfil(
+  id: string,
+  valeurs: { nom?: string; telephone?: string | null }
+): Promise<Utilisateur> {
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("profils")
+    .update(valeurs)
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return versUtilisateur(data);
+}
+
+export async function majDonateur(
+  id: string,
+  valeurs: { nom?: string; telephone?: string | null; email?: string | null }
+): Promise<void> {
+  const supabase = creerClientAdmin();
+  const { error } = await supabase
+    .from("donateurs")
+    .update(valeurs)
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 // ---------------------------------------------------------------------------
 // Statistiques
 // ---------------------------------------------------------------------------
