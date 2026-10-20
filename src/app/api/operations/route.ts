@@ -1,15 +1,13 @@
 import { type NextRequest } from "next/server";
-import bcrypt from "bcryptjs";
-import { createSession, getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { EMAIL_RE, erreur, lireBody } from "@/lib/api";
+import { creerClientAdmin, creerClientServeur } from "@/lib/supabase/server";
 import {
   ajouterOperation,
-  ajouterUser,
   getOperations,
   getOperationsDonateur,
   reinitialiserCollecte,
   trouverOuCreerDonateur,
-  trouverUserParEmail,
 } from "@/lib/store";
 import type { MethodePaiement, TypeOffrande } from "@/lib/types";
 
@@ -147,24 +145,25 @@ export async function POST(request: Request) {
   if (compte?.email && compte.motDePasse) {
     const email = compte.email.trim().toLowerCase();
     if (EMAIL_RE.test(email) && compte.motDePasse.length >= 8) {
-      const existant = await trouverUserParEmail(email);
-      if (!existant) {
-        const hash = await bcrypt.hash(compte.motDePasse, 10);
-        const user = await ajouterUser({
+      const admin = creerClientAdmin();
+      const { data, error } = await admin.auth.admin.createUser({
+        email,
+        password: compte.motDePasse,
+        email_confirm: true,
+        user_metadata: {
           nom: donateur.nom,
-          email,
-          telephone: donateur.telephone,
+          telephone: donateur.telephone ?? "",
           role: "membre",
-          motDePasseHash: hash,
-          donateurId: donateur.id,
+          donateur_id: donateur.id,
           source: "local",
-        });
-        await createSession({
-          sub: user.id,
-          nom: user.nom,
-          email: user.email,
-          role: user.role,
-          donateurId: donateur.id,
+        },
+      });
+
+      if (!error && data.user) {
+        const supabase = await creerClientServeur();
+        await supabase.auth.signInWithPassword({
+          email,
+          password: compte.motDePasse,
         });
         compteCree = true;
       }

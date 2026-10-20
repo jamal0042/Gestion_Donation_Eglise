@@ -1,12 +1,6 @@
 import type { Utilisateur } from "./types";
 
-export type UtilisateurPublic = Omit<Utilisateur, "motDePasseHash">;
-
-export function sansMotDePasse(user: Utilisateur): UtilisateurPublic {
-  const copie = { ...user };
-  delete copie.motDePasseHash;
-  return copie;
-}
+export type UtilisateurPublic = Utilisateur;
 
 export async function lireBody<T>(request: Request): Promise<T | null> {
   try {

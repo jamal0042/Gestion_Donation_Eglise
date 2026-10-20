@@ -6,26 +6,48 @@ Application de gestion des offrandes et des projets pour l'Église de Bunia : pa
 
 ```bash
 npm install
-cp .env.example .env.local   # Windows : copy .env.example .env.local
+copy .env.example .env.local   # Windows (macOS/Linux : cp)
 npm run dev
 ```
 
 Ouvrez [http://localhost:3000](http://localhost:3000).
 
+## Base de données & authentification (Supabase)
+
+Le projet s'appuie sur **Supabase** pour la base de données (PostgreSQL) et
+l'authentification (e-mail/mot de passe, Google, réinitialisation par e-mail).
+
+1. Créez un projet sur [supabase.com](https://supabase.com).
+2. Dans **SQL Editor**, exécutez le script `supabase/migrations/0001_init.sql`
+   (tables, types, index, triggers et politiques RLS).
+3. Dans **Project Settings > API**, copiez l'URL, la clé `anon` et la clé
+   `service_role` dans `.env.local`.
+4. (Google, optionnel) Dans **Authentication > Providers**, activez Google et
+   renseignez votre `Client ID` / `Client Secret` Google. Ajoutez l'URL de
+   redirection `https://<votre-domaine>/auth/callback`.
+5. (E-mails) Dans **Authentication > URL Configuration**, définissez le
+   *Site URL* sur l'URL de l'application.
+
+Pour devenir **trésorier**, créez votre compte puis, dans le SQL Editor :
+
+```sql
+update public.profils set role = 'tresorier'
+ where id = (select id from auth.users where email = 'vous@exemple.cd');
+```
+
 ## Environnement (`.env.local`)
 
 | Variable | Rôle |
 |---|---|
-| `AUTH_SECRET` | Secret de signature de la session JWT (obligatoire, ≥ 32 octets). |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Connexion Google (optionnel). |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase (obligatoire). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé `anon` Supabase (obligatoire). |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé `service_role` — serveur uniquement (écritures, admin). |
 | `NEXT_PUBLIC_APP_URL` | URL publique utilisée pour les liens de réinitialisation (optionnel). |
 
 ## Comptes de démonstration
 
-| Rôle | E-mail | Mot de passe |
-|---|---|---|
-| Trésorier | `tresorier@eglisabunia.cd` | `Demo1234!` |
-| Donateur | `jean@exemple.cd` | `Demo1234!` |
+Créez vos comptes via `/inscription` (l'inscription crée le profil et le
+donateur liés). Puis promouvez un compte en trésorier (voir ci-dessus).
 
 ## Fonctionnalités
 
@@ -44,7 +66,10 @@ L'application est installable sur Android, iOS, Windows et macOS : ouvrez le sit
 
 ## Stockage
 
-Prototype local : données JSON sous `data/` (`operations.json`, `donateurs.json`, `projets.json`, `users.json`, `resets.json`). Pensez à migrer vers une base de données en production.
+Base de données **Supabase** (PostgreSQL). Le schéma complet se trouve dans
+`supabase/migrations/0001_init.sql`. Les accès serveur passent par
+`src/lib/store.ts` (client `service_role`) et l'authentification par
+`src/lib/auth.ts` (session Supabase vérifiée côté serveur).
 
 ## Scripts
 

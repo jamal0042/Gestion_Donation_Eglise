@@ -6,11 +6,7 @@ import { ResetForm } from "@/components/AuthForms";
 
 export const metadata: Metadata = { title: "Réinitialiser le mot de passe" };
 
-export default function Page({
-  params,
-}: {
-  params: Promise<{ token: string }>;
-}) {
+export default function Page() {
   return (
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-4 py-16">
       <div className="text-center">
@@ -25,20 +21,22 @@ export default function Page({
         </p>
       </div>
       <div className="card mt-8 p-6 sm:p-8">
-        <Suspense fallback={<p className="py-8 text-center text-slate-400">Chargement…</p>}>
-          <FormulaireWrapper params={params} />
+        <Suspense
+          fallback={
+            <p className="py-8 text-center text-slate-400">Chargement…</p>
+          }
+        >
+          <ResetForm />
         </Suspense>
       </div>
       <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
-        <Link href="/connexion" className="font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200">
+        <Link
+          href="/connexion"
+          className="font-semibold text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200"
+        >
           Retour à la connexion
         </Link>
       </p>
     </div>
   );
-}
-
-async function FormulaireWrapper({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = await params;
-  return <ResetForm token={token} />;
 }

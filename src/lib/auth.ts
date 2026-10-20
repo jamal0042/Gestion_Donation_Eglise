@@ -1,39 +1,37 @@
-import { cookies } from "next/headers";
+import { creerClientServeur } from "./supabase/server";
+import { trouverProfil } from "./store";
 import type { SessionPayload } from "./types";
-import {
-  SESSION_COOKIE,
-  SESSION_DUREE,
-  creerToken,
-  verifierToken,
-} from "./session";
 
+/**
+ * Récupère la session courante en vérifiant le jeton auprès de Supabase Auth.
+ * `getClaims` valide la signature du JWT et rafraîchit les cookies si besoin.
+ */
 export async function getSession(): Promise<SessionPayload | null> {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-  return verifierToken(token);
-}
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.auth.getClaims();
+  if (error || !data?.claims) return null;
 
-export async function createSession(payload: SessionPayload): Promise<void> {
-  const token = await creerToken(payload);
-  (await cookies()).set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_DUREE,
-  });
-}
+  const sub = data.claims.sub;
+  if (!sub) return null;
 
-export async function destroySession(): Promise<void> {
-  (await cookies()).delete(SESSION_COOKIE);
-}
+  const profil = await trouverProfil(sub);
+  const email =
+    typeof data.claims.email === "string" ? data.claims.email : "";
 
-export function sessionCookieOptions() {
+  if (!profil) {
+    return {
+      sub,
+      nom: email.split("@")[0] || "Utilisateur",
+      email,
+      role: "membre",
+    };
+  }
+
   return {
-    httpOnly: true,
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_DUREE,
+    sub: profil.id,
+    nom: profil.nom,
+    email,
+    role: profil.role,
+    donateurId: profil.donateurId,
   };
 }

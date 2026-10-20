@@ -1,6 +1,7 @@
-import { destroySession } from "@/lib/auth";
+import { creerClientServeur } from "@/lib/supabase/server";
 
 export async function POST() {
-  await destroySession();
+  const supabase = await creerClientServeur();
+  await supabase.auth.signOut();
   return Response.json({ ok: true });
 }

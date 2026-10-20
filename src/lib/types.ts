@@ -21,7 +21,6 @@ export interface Utilisateur {
   email: string;
   telephone?: string;
   role: Role;
-  motDePasseHash?: string;
   donateurId?: string;
   creeLe: string;
   source?: "local" | "google";
@@ -57,12 +56,6 @@ export interface Projet {
   collecte: number;
   statut: StatutProjet;
   dateDebut: string;
-}
-
-export interface ResetToken {
-  token: string;
-  email: string;
-  expire: string;
 }
 
 export interface SessionPayload {

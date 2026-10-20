@@ -1,12 +1,9 @@
-import bcrypt from "bcryptjs";
-import { createSession } from "@/lib/auth";
-import { EMAIL_RE, erreur, lireBody, sansMotDePasse } from "@/lib/api";
-import { trouverUserParEmail } from "@/lib/store";
+import { EMAIL_RE, erreur, lireBody } from "@/lib/api";
+import { creerClientServeur } from "@/lib/supabase/server";
+import { trouverProfil } from "@/lib/store";
 
 export async function POST(request: Request) {
-  const body = await lireBody<{ email?: string; motDePasse?: string }>(
-    request
-  );
+  const body = await lireBody<{ email?: string; motDePasse?: string }>(request);
   if (!body) return erreur("Corps de requête invalide.");
 
   const email = body.email?.trim() ?? "";
@@ -15,20 +12,19 @@ export async function POST(request: Request) {
   if (!EMAIL_RE.test(email) || !motDePasse)
     return erreur("E-mail et mot de passe obligatoires.");
 
-  const user = await trouverUserParEmail(email);
-  if (!user?.motDePasseHash)
-    return erreur("Identifiants incorrects.", 401);
-
-  const ok = await bcrypt.compare(motDePasse, user.motDePasseHash);
-  if (!ok) return erreur("Identifiants incorrects.", 401);
-
-  await createSession({
-    sub: user.id,
-    nom: user.nom,
-    email: user.email,
-    role: user.role,
-    donateurId: user.donateurId,
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password: motDePasse,
   });
 
-  return Response.json({ ok: true, utilisateur: sansMotDePasse(user) });
+  if (error || !data.user)
+    return erreur("Identifiants incorrects.", 401);
+
+  const profil = await trouverProfil(data.user.id);
+  const utilisateur = profil
+    ? { ...profil, email: data.user.email ?? email }
+    : null;
+
+  return Response.json({ ok: true, utilisateur });
 }

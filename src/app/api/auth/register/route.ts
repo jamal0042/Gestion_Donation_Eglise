@@ -1,7 +1,6 @@
-import bcrypt from "bcryptjs";
-import { createSession } from "@/lib/auth";
-import { EMAIL_RE, erreur, lireBody, sansMotDePasse } from "@/lib/api";
-import { ajouterUser, trouverOuCreerDonateur, trouverUserParEmail } from "@/lib/store";
+import { EMAIL_RE, erreur, lireBody } from "@/lib/api";
+import { creerClientAdmin, creerClientServeur } from "@/lib/supabase/server";
+import { trouverOuCreerDonateur, trouverProfil } from "@/lib/store";
 
 export async function POST(request: Request) {
   const body = await lireBody<{
@@ -22,28 +21,41 @@ export async function POST(request: Request) {
   if (motDePasse.length < 8)
     return erreur("Le mot de passe doit contenir au moins 8 caractères.");
 
-  const existant = await trouverUserParEmail(email);
-  if (existant) return erreur("Un compte existe déjà avec cet e-mail.", 409);
+  const admin = creerClientAdmin();
 
-  const hash = await bcrypt.hash(motDePasse, 10);
   const donateur = await trouverOuCreerDonateur({ nom, telephone, email });
-  const user = await ajouterUser({
-    nom,
+
+  const { data, error } = await admin.auth.admin.createUser({
     email,
-    telephone,
-    role: "membre",
-    motDePasseHash: hash,
-    donateurId: donateur.id,
-    source: "local",
+    password: motDePasse,
+    email_confirm: true,
+    user_metadata: {
+      nom,
+      telephone: telephone ?? "",
+      role: "membre",
+      donateur_id: donateur.id,
+      source: "local",
+    },
   });
 
-  await createSession({
-    sub: user.id,
-    nom: user.nom,
-    email: user.email,
-    role: user.role,
-    donateurId: donateur.id,
-  });
+  if (error || !data.user) {
+    const dejaPrise = error?.message.toLowerCase().includes("already");
+    return erreur(
+      dejaPrise
+        ? "Un compte existe déjà avec cet e-mail."
+        : error?.message ?? "Impossible de créer le compte.",
+      dejaPrise ? 409 : 400
+    );
+  }
 
-  return Response.json({ ok: true, utilisateur: sansMotDePasse(user) });
+  const supabase = await creerClientServeur();
+  const { error: erreurConnexion } = await supabase.auth.signInWithPassword({
+    email,
+    password: motDePasse,
+  });
+  if (erreurConnexion) return erreur("Compte créé, veuillez vous connecter.", 201);
+
+  const profil = await trouverProfil(data.user.id);
+
+  return Response.json({ ok: true, utilisateur: profil });
 }

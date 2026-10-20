@@ -1,102 +1,170 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { randomUUID } from "node:crypto";
 import type {
   Donateur,
   Operation,
   Projet,
-  ResetToken,
+  Role,
   TypeOffrande,
   Utilisateur,
 } from "./types";
+import type { Database } from "./database.types";
+import { creerClientAdmin } from "./supabase/server";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+type LigneOperation = Database["public"]["Tables"]["operations"]["Row"];
+type LigneDonateur = Database["public"]["Tables"]["donateurs"]["Row"];
+type LigneProjet = Database["public"]["Tables"]["projets"]["Row"];
+type LigneProfil = Database["public"]["Tables"]["profils"]["Row"];
 
-async function lireJson<T>(fichier: string, defaut: T): Promise<T> {
-  try {
-    const brut = await fs.readFile(path.join(DATA_DIR, fichier), "utf-8");
-    return JSON.parse(brut) as T;
-  } catch {
-    return defaut;
-  }
+function versOperation(ligne: LigneOperation): Operation {
+  return {
+    id: ligne.id,
+    numeroRecu: ligne.numero_recu,
+    date: ligne.date,
+    montant: Number(ligne.montant),
+    type: ligne.type,
+    methode: ligne.methode,
+    donateurId: ligne.donateur_id,
+    donateurNom: ligne.donateur_nom,
+    projetId: ligne.projet_id,
+    note: ligne.note ?? undefined,
+    creePar: ligne.cree_par ?? undefined,
+  };
 }
 
-async function ecrireJson(fichier: string, donnees: unknown): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(
-    path.join(DATA_DIR, fichier),
-    JSON.stringify(donnees, null, 2),
-    "utf-8"
-  );
+function versDonateur(ligne: LigneDonateur): Donateur {
+  return {
+    id: ligne.id,
+    nom: ligne.nom,
+    telephone: ligne.telephone ?? undefined,
+    email: ligne.email ?? undefined,
+    creeLe: ligne.cree_le,
+  };
 }
 
-function trierOperations(operations: Operation[]): Operation[] {
-  return [...operations].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+function versProjet(ligne: LigneProjet): Projet {
+  return {
+    id: ligne.id,
+    nom: ligne.nom,
+    description: ligne.description,
+    objectif: Number(ligne.objectif),
+    collecte: Number(ligne.collecte),
+    statut: ligne.statut,
+    dateDebut: ligne.date_debut,
+  };
 }
 
+export function versUtilisateur(ligne: LigneProfil): Utilisateur {
+  return {
+    id: ligne.id,
+    nom: ligne.nom,
+    email: "",
+    telephone: ligne.telephone ?? undefined,
+    role: ligne.role,
+    donateurId: ligne.donateur_id ?? undefined,
+    creeLe: ligne.cree_le,
+    source: (ligne.source as Utilisateur["source"]) ?? "local",
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Opérations
+// ---------------------------------------------------------------------------
 export async function getOperations(): Promise<Operation[]> {
-  return trierOperations(await lireJson<Operation[]>("operations.json", []));
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("operations")
+    .select("*")
+    .order("date", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(versOperation);
 }
 
 export async function getOperation(id: string): Promise<Operation | null> {
-  const operations = await getOperations();
-  return operations.find((o) => o.id === id) ?? null;
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("operations")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? versOperation(data) : null;
 }
 
 export async function getOperationsDonateur(
   donateurId: string
 ): Promise<Operation[]> {
-  const operations = await getOperations();
-  return operations.filter((o) => o.donateurId === donateurId);
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("operations")
+    .select("*")
+    .eq("donateur_id", donateurId)
+    .order("date", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(versOperation);
 }
 
 export async function ajouterOperation(
   input: Omit<Operation, "id" | "numeroRecu"> & { numeroRecu?: string }
 ): Promise<Operation> {
-  const operations = await getOperations();
-  const annee = new Date(input.date).getFullYear();
-  const prefixe = `REC-${annee}-`;
-  const duannee = operations.filter((o) =>
-    o.numeroRecu.startsWith(prefixe)
-  ).length;
-  const numero =
-    input.numeroRecu ??
-    `${prefixe}${String(duannee + 1).padStart(4, "0")}`;
-
-  const operation: Operation = {
-    ...input,
-    id: randomUUID(),
-    numeroRecu: numero,
-  };
-  operations.push(operation);
-  await ecrireJson("operations.json", operations);
-  return operation;
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("operations")
+    .insert({
+      numero_recu: input.numeroRecu,
+      date: input.date,
+      montant: input.montant,
+      type: input.type,
+      methode: input.methode,
+      donateur_id: input.donateurId,
+      donateur_nom: input.donateurNom,
+      projet_id: input.projetId ?? null,
+      note: input.note ?? null,
+      cree_par: input.creePar ?? null,
+    })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return versOperation(data);
 }
 
+// ---------------------------------------------------------------------------
+// Donateurs
+// ---------------------------------------------------------------------------
 export async function getDonateurs(): Promise<Donateur[]> {
-  const donnees = await lireJson<Donateur[]>("donateurs.json", []);
-  return [...donnees].sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("donateurs")
+    .select("*")
+    .order("nom", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(versDonateur);
 }
 
 export async function getDonateur(id: string): Promise<Donateur | null> {
-  const donnees = await getDonateurs();
-  return donnees.find((d) => d.id === id) ?? null;
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("donateurs")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? versDonateur(data) : null;
 }
 
 export async function ajouterDonateur(
   input: Omit<Donateur, "id" | "creeLe">
 ): Promise<Donateur> {
-  const donnees = await lireJson<Donateur[]>("donateurs.json", []);
-  const donateur: Donateur = {
-    ...input,
-    id: randomUUID(),
-    creeLe: new Date().toISOString(),
-  };
-  donnees.push(donateur);
-  await ecrireJson("donateurs.json", donnees);
-  return donateur;
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("donateurs")
+    .insert({
+      nom: input.nom,
+      telephone: input.telephone ?? null,
+      email: input.email ?? null,
+    })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return versDonateur(data);
 }
 
 export async function trouverOuCreerDonateur(input: {
@@ -104,133 +172,116 @@ export async function trouverOuCreerDonateur(input: {
   telephone?: string;
   email?: string;
 }): Promise<Donateur> {
-  const donnees = await lireJson<Donateur[]>("donateurs.json", []);
-  const existant = donnees.find(
-    (d) =>
-      (input.email && d.email?.toLowerCase() === input.email.toLowerCase()) ||
-      (input.telephone && d.telephone === input.telephone) ||
-      d.nom.toLowerCase() === input.nom.toLowerCase()
-  );
-  if (existant) return existant;
+  const supabase = creerClientAdmin();
+
+  const filtres: string[] = [];
+  if (input.email) filtres.push(`email.ilike.${input.email}`);
+  if (input.telephone) filtres.push(`telephone.eq.${input.telephone}`);
+  filtres.push(`nom.ilike.${input.nom}`);
+
+  const { data, error } = await supabase
+    .from("donateurs")
+    .select("*")
+    .or(filtres.join(","))
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (data) return versDonateur(data);
+
   return ajouterDonateur(input);
 }
 
+// ---------------------------------------------------------------------------
+// Projets
+// ---------------------------------------------------------------------------
 export async function getProjets(): Promise<Projet[]> {
-  const donnees = await lireJson<Projet[]>("projets.json", []);
-  return [...donnees].sort((a, b) => a.dateDebut.localeCompare(b.dateDebut));
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("projets")
+    .select("*")
+    .order("date_debut", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(versProjet);
 }
 
 export async function getProjet(id: string): Promise<Projet | null> {
-  const donnees = await getProjets();
-  return donnees.find((p) => p.id === id) ?? null;
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("projets")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? versProjet(data) : null;
 }
 
 export async function enregistrerProjet(
   input: Omit<Projet, "id"> & { id?: string }
 ): Promise<Projet> {
-  const donnees = await lireJson<Projet[]>("projets.json", []);
-  if (input.id) {
-    const index = donnees.findIndex((p) => p.id === input.id);
-    if (index >= 0) {
-      donnees[index] = { ...donnees[index], ...input, id: input.id };
-      await ecrireJson("projets.json", donnees);
-      return donnees[index];
-    }
-  }
-  const projet: Projet = { ...input, id: randomUUID() };
-  donnees.push(projet);
-  await ecrireJson("projets.json", donnees);
-  return projet;
-}
-
-export async function reinitialiserCollecte(
-  projetId: string
-): Promise<void> {
-  const operations = await getOperations();
-  const total = operations
-    .filter((o) => o.projetId === projetId)
-    .reduce((somme, o) => somme + o.montant, 0);
-  const projets = await lireJson<Projet[]>("projets.json", []);
-  const index = projets.findIndex((p) => p.id === projetId);
-  if (index >= 0) {
-    projets[index].collecte = total;
-    await ecrireJson("projets.json", projets);
-  }
-}
-
-export async function getUsers(): Promise<Utilisateur[]> {
-  return lireJson<Utilisateur[]>("users.json", []);
-}
-
-export async function trouverUserParEmail(
-  email: string
-): Promise<Utilisateur | null> {
-  const users = await getUsers();
-  return (
-    users.find((u) => u.email.toLowerCase() === email.toLowerCase()) ?? null
-  );
-}
-
-export async function trouverUser(id: string): Promise<Utilisateur | null> {
-  const users = await getUsers();
-  return users.find((u) => u.id === id) ?? null;
-}
-
-export async function ajouterUser(
-  input: Omit<Utilisateur, "id" | "creeLe">
-): Promise<Utilisateur> {
-  const users = await getUsers();
-  const user: Utilisateur = {
-    ...input,
-    id: randomUUID(),
-    creeLe: new Date().toISOString(),
+  const supabase = creerClientAdmin();
+  const valeurs = {
+    nom: input.nom,
+    description: input.description,
+    objectif: input.objectif,
+    collecte: input.collecte,
+    statut: input.statut,
+    date_debut: input.dateDebut,
   };
-  users.push(user);
-  await ecrireJson("users.json", users);
-  return user;
+
+  if (input.id) {
+    const { data, error } = await supabase
+      .from("projets")
+      .update(valeurs)
+      .eq("id", input.id)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    return versProjet(data);
+  }
+
+  const { data, error } = await supabase
+    .from("projets")
+    .insert(valeurs)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+  return versProjet(data);
 }
 
-export async function modifierMotDePasse(
-  email: string,
-  motDePasseHash: string
-): Promise<boolean> {
-  const users = await getUsers();
-  const index = users.findIndex(
-    (u) => u.email.toLowerCase() === email.toLowerCase()
-  );
-  if (index < 0) return false;
-  users[index].motDePasseHash = motDePasseHash;
-  await ecrireJson("users.json", users);
-  return true;
-}
-
-export async function creerResetToken(email: string): Promise<string> {
-  const tokens = await lireJson<ResetToken[]>("resets.json", []);
-  const propre = tokens.filter((t) => t.email !== email);
-  const token = randomUUID() + randomUUID().replace(/-/g, "");
-  propre.push({
-    token,
-    email,
-    expire: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
+export async function reinitialiserCollecte(projetId: string): Promise<void> {
+  const supabase = creerClientAdmin();
+  const { error } = await supabase.rpc("recalculer_collecte", {
+    p_projet_id: projetId,
   });
-  await ecrireJson("resets.json", propre);
-  return token;
+  if (error) throw new Error(error.message);
 }
 
-export async function utiliserResetToken(
-  token: string
-): Promise<string | null> {
-  const tokens = await lireJson<ResetToken[]>("resets.json", []);
-  const trouve = tokens.find((t) => t.token === token);
-  if (!trouve) return null;
-  if (new Date(trouve.expire).getTime() < Date.now()) return null;
-  await ecrireJson(
-    "resets.json",
-    tokens.filter((t) => t.token !== token)
-  );
-  return trouve.email;
+// ---------------------------------------------------------------------------
+// Profils utilisateurs
+// ---------------------------------------------------------------------------
+export async function trouverProfil(id: string): Promise<Utilisateur | null> {
+  const supabase = creerClientAdmin();
+  const { data, error } = await supabase
+    .from("profils")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data ? versUtilisateur(data) : null;
 }
 
+export async function majRole(id: string, role: Role): Promise<void> {
+  const supabase = creerClientAdmin();
+  const { error } = await supabase
+    .from("profils")
+    .update({ role })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+// ---------------------------------------------------------------------------
+// Statistiques
+// ---------------------------------------------------------------------------
 export interface Statistiques {
   totalMois: number;
   totalAnnee: number;

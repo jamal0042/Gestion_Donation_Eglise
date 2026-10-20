@@ -1,32 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
+import { creerClientServeur, supabaseConfigure } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
+  if (!supabaseConfigure()) {
     return NextResponse.json(
       {
         erreur:
-          "Connexion Google non configurée. Renseignez GOOGLE_CLIENT_ID et GOOGLE_CLIENT_SECRET dans .env.local puis relancez le serveur.",
+          "Connexion Google non configurée. Activez le fournisseur Google dans Supabase puis vérifiez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY.",
       },
       { status: 501 }
     );
   }
 
   const next = request.nextUrl.searchParams.get("next") ?? "/";
-  const callback = new URL("/api/auth/google/callback", request.url).toString();
+  const origine = request.nextUrl.origin;
 
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: callback,
-    response_type: "code",
-    scope: "openid email profile",
-    prompt: "select_account",
-    state: Buffer.from(JSON.stringify({ next })).toString("base64url"),
+  const supabase = await creerClientServeur();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origine}/auth/callback?next=${encodeURIComponent(next)}`,
+      queryParams: { prompt: "select_account" },
+    },
   });
 
-  return NextResponse.redirect(
-    `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
-  );
+  if (error || !data.url) {
+    return NextResponse.redirect(
+      new URL("/connexion?erreur=google", request.url)
+    );
+  }
+
+  return NextResponse.redirect(data.url);
 }

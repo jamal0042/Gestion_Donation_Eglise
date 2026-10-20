@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { KeyRound, Mail, Phone, UserRound } from "lucide-react";
+import { creerClientNavigateur } from "@/lib/supabase/browser";
 
 function GoogleButton({ next }: { next: string }) {
   return (
@@ -257,7 +258,6 @@ export function RegisterForm() {
 export function ForgotForm() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const [lien, setLien] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
 
   async function soumettre(e: React.FormEvent) {
@@ -271,7 +271,6 @@ export function ForgotForm() {
       });
       const data = await res.json();
       setMessage(data.message ?? "Vérifiez votre boîte de réception.");
-      setLien(data.lien ?? null);
     } catch {
       setMessage("Impossible de contacter le serveur.");
     } finally {
@@ -285,20 +284,6 @@ export function ForgotForm() {
         <p className="rounded-lg bg-brand-50 dark:bg-brand-500/15 px-4 py-3 text-sm text-brand-800 dark:text-brand-200">
           {message}
         </p>
-        {lien && (
-          <div className="rounded-xl border border-dashed border-brand-300 dark:border-brand-400 bg-brand-50/50 dark:bg-brand-500/10 p-4 text-left">
-            <p className="text-xs font-semibold text-brand-600 dark:text-brand-300">
-              Serveur e-mail non configuré : voici votre lien de
-              réinitialisation (en production, il est envoyé par e-mail).
-            </p>
-            <a
-              href={lien}
-              className="mt-2 block break-all font-mono text-sm font-bold text-brand-700 dark:text-brand-300 underline"
-            >
-              {lien}
-            </a>
-          </div>
-        )}
       </div>
     );
   }
@@ -328,12 +313,33 @@ export function ForgotForm() {
   );
 }
 
-export function ResetForm({ token }: { token: string }) {
+export function ResetForm() {
   const router = useRouter();
   const [motDePasse, setMotDePasse] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [erreur, setErreur] = useState("");
+  const [pret, setPret] = useState(false);
   const [enCours, setEnCours] = useState(false);
+
+  useEffect(() => {
+    const supabase = creerClientNavigateur();
+    let actif = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (actif && data.session) setPret(true);
+    });
+
+    const { data: abonnement } = supabase.auth.onAuthStateChange(
+      (_evenement, session) => {
+        if (actif && session) setPret(true);
+      }
+    );
+
+    return () => {
+      actif = false;
+      abonnement.subscription.unsubscribe();
+    };
+  }, []);
 
   async function soumettre(e: React.FormEvent) {
     e.preventDefault();
@@ -344,22 +350,35 @@ export function ResetForm({ token }: { token: string }) {
     }
     setEnCours(true);
     try {
-      const res = await fetch("/api/auth/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, motDePasse }),
+      const supabase = creerClientNavigateur();
+      const { error } = await supabase.auth.updateUser({
+        password: motDePasse,
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setErreur(data.erreur ?? "Impossible de réinitialiser.");
+      if (error) {
+        setErreur(
+          "Lien invalide ou expiré. Demandez-en un nouveau."
+        );
         setEnCours(false);
         return;
       }
+      await fetch("/api/auth/logout", { method: "POST" });
       router.push("/connexion?reinitialise=1");
     } catch {
       setErreur("Impossible de contacter le serveur.");
       setEnCours(false);
     }
+  }
+
+  if (!pret) {
+    return (
+      <p className="rounded-lg bg-amber-50 dark:bg-amber-500/15 px-4 py-3 text-center text-sm font-medium text-amber-700 dark:text-amber-300">
+        Lien de réinitialisation invalide ou expiré.{" "}
+        <a href="/mot-de-passe-oublie" className="underline">
+          Demander un nouveau lien
+        </a>
+        .
+      </p>
+    );
   }
 
   return (
