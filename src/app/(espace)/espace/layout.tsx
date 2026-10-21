@@ -2,8 +2,14 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import EspaceChrome from "@/components/espace/Chrome";
+import { supabaseConfigure } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 async function RequireSession() {
+  if (!supabaseConfigure()) {
+    redirect("/");
+  }
   const session = await getSession();
   if (!session) redirect("/connexion?next=/espace");
   return null;
