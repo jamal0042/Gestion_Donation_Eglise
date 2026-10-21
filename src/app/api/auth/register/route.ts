@@ -1,8 +1,14 @@
-import { EMAIL_RE, erreur, lireBody } from "@/lib/api";
-import { creerClientAdmin, creerClientServeur } from "@/lib/supabase/server";
+import { EMAIL_RE, erreur, erreurConfigurationSupabase, lireBody } from "@/lib/api";
+import {
+  creerClientAdmin,
+  creerClientServeur,
+  serviceRoleConfigure,
+} from "@/lib/supabase/server";
 import { trouverOuCreerDonateur, trouverProfil } from "@/lib/store";
 
 export async function POST(request: Request) {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const body = await lireBody<{
     nom?: string;
     email?: string;

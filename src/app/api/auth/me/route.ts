@@ -1,7 +1,10 @@
-import { creerClientServeur } from "@/lib/supabase/server";
+import { creerClientServeur, supabaseConfigure } from "@/lib/supabase/server";
+import { erreurConfigurationSupabase } from "@/lib/api";
 import { trouverProfil } from "@/lib/store";
 
 export async function GET() {
+  if (!supabaseConfigure()) return erreurConfigurationSupabase();
+
   const supabase = await creerClientServeur();
   const {
     data: { user },

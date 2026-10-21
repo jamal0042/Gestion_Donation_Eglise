@@ -1,15 +1,8 @@
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import type { Metadata } from "next";
 import { RecuListe } from "@/components/espace/RecuListe";
-import { supabaseConfigure } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Mes reçus" };
 
-export default async function Page() {
-  if (!supabaseConfigure()) {
-    redirect("/");
-  }
-  const session = await getSession();
-  if (!session) redirect("/connexion?next=/espace");
+export default function Page() {
   return <RecuListe />;
 }

@@ -1,8 +1,11 @@
 import { getSession } from "@/lib/auth";
-import { erreur } from "@/lib/api";
+import { erreur, erreurConfigurationSupabase } from "@/lib/api";
+import { serviceRoleConfigure } from "@/lib/supabase/server";
 import { getDonateurs, getOperations } from "@/lib/store";
 
 export async function GET() {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const session = await getSession();
   if (!session) return erreur("Authentification requise.", 401);
   if (session.role !== "tresorier")

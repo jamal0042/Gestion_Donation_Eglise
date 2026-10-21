@@ -9,7 +9,7 @@ export function variablesSupabase() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) {
     throw new Error(
-      "Supabase non configuré"
+      "Supabase non configuré : renseignez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local (et dans les variables d'environnement du déploiement)."
     );
   }
   return { url, anonKey };
@@ -22,14 +22,24 @@ export function supabaseConfigure() {
   );
 }
 
+export function serviceRoleConfigure() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+}
+
 /**
  * Client Supabase côté serveur (Server Components, Route Handlers, Server
  * Actions). Il s'appuie sur les cookies de la requête pour restaurer la
  * session : il doit être recréé à chaque requête.
  */
 export async function creerClientServeur() {
-  const { url, anonKey } = variablesSupabase();
+  // La lecture des cookies est le point de suspension du composant : elle
+  // doit précéder toute validation de la configuration, sinon le prerender
+  // échoue au lieu de simplement exclure la page du shell statique.
   const cookieStore = await cookies();
+  const { url, anonKey } = variablesSupabase();
 
   return createServerClient<Database>(url, anonKey, {
     cookies: {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { creerClientServeur } from "@/lib/supabase/server";
+import { creerClientServeur, serviceRoleConfigure } from "@/lib/supabase/server";
 import { trouverOuCreerDonateur, trouverProfil } from "@/lib/store";
 
 /**
@@ -8,6 +8,12 @@ import { trouverOuCreerDonateur, trouverProfil } from "@/lib/store";
  * l'utilisateur vers sa destination.
  */
 export async function GET(request: NextRequest) {
+  if (!serviceRoleConfigure()) {
+    return NextResponse.redirect(
+      new URL("/connexion?erreur=google", request.url)
+    );
+  }
+
   const code = request.nextUrl.searchParams.get("code");
   const next = request.nextUrl.searchParams.get("next") ?? "/espace";
   const destination = next.startsWith("/") ? next : "/espace";

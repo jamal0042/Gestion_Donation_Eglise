@@ -1,9 +1,16 @@
 import { getSession } from "@/lib/auth";
-import { EMAIL_RE, erreur, lireBody } from "@/lib/api";
+import {
+  EMAIL_RE,
+  erreur,
+  erreurConfigurationSupabase,
+  lireBody,
+} from "@/lib/api";
 import { majDonateur, majProfil, trouverProfil } from "@/lib/store";
-import { creerClientAdmin } from "@/lib/supabase/server";
+import { creerClientAdmin, serviceRoleConfigure } from "@/lib/supabase/server";
 
 export async function GET() {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const session = await getSession();
   if (!session) return erreur("Authentification requise.", 401);
 
@@ -16,6 +23,8 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const session = await getSession();
   if (!session) return erreur("Authentification requise.", 401);
 
@@ -48,6 +57,8 @@ export async function PATCH(request: Request) {
 
 export async function POST(request: Request) {
   // Changement d'adresse e-mail.
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const session = await getSession();
   if (!session) return erreur("Authentification requise.", 401);
 

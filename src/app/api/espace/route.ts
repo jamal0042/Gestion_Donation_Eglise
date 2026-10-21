@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/auth";
-import { erreur } from "@/lib/api";
+import { erreur, erreurConfigurationSupabase } from "@/lib/api";
+import { serviceRoleConfigure } from "@/lib/supabase/server";
 import {
   getOperationsDonateur,
   getProjets,
@@ -26,6 +27,8 @@ export interface MoisStat {
 }
 
 export async function GET() {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const session = await getSession();
   if (!session) return erreur("Authentification requise.", 401);
 

@@ -1,22 +1,43 @@
-import { creerClientServeur } from "./supabase/server";
+import {
+  creerClientServeur,
+  serviceRoleConfigure,
+  supabaseConfigure,
+} from "./supabase/server";
 import { trouverProfil } from "./store";
-import type { SessionPayload } from "./types";
+import type { SessionPayload, Utilisateur } from "./types";
 
 /**
  * Récupère la session courante en vérifiant le jeton auprès de Supabase Auth.
  * `getClaims` valide la signature du JWT et rafraîchit les cookies si besoin.
+ * Renvoie `null` si aucune session n'est établie ou si Supabase n'est pas
+ * configuré (déploiement sans variables d'environnement).
  */
 export async function getSession(): Promise<SessionPayload | null> {
-  const supabase = await creerClientServeur();
+  let supabase: Awaited<ReturnType<typeof creerClientServeur>>;
+  try {
+    supabase = await creerClientServeur();
+  } catch (erreur) {
+    if (!supabaseConfigure()) return null;
+    throw erreur;
+  }
+
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims) return null;
 
   const sub = data.claims.sub;
   if (!sub) return null;
 
-  const profil = await trouverProfil(sub);
   const email =
     typeof data.claims.email === "string" ? data.claims.email : "";
+
+  let profil: Utilisateur | null = null;
+  if (serviceRoleConfigure()) {
+    try {
+      profil = await trouverProfil(sub);
+    } catch {
+      profil = null;
+    }
+  }
 
   if (!profil) {
     return {

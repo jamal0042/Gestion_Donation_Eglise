@@ -1,7 +1,16 @@
 import { type NextRequest } from "next/server";
 import { getSession } from "@/lib/auth";
-import { EMAIL_RE, erreur, lireBody } from "@/lib/api";
-import { creerClientAdmin, creerClientServeur } from "@/lib/supabase/server";
+import {
+  EMAIL_RE,
+  erreur,
+  erreurConfigurationSupabase,
+  lireBody,
+} from "@/lib/api";
+import {
+  creerClientAdmin,
+  creerClientServeur,
+  serviceRoleConfigure,
+} from "@/lib/supabase/server";
 import {
   ajouterOperation,
   getOperations,
@@ -26,6 +35,8 @@ const METHODES: MethodePaiement[] = [
 ];
 
 export async function GET(request: NextRequest) {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const session = await getSession();
   if (!session) return erreur("Authentification requise.", 401);
 
@@ -94,6 +105,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: Request) {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const body = await lireBody<{
     nom?: string;
     telephone?: string;

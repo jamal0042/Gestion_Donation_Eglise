@@ -1,17 +1,25 @@
 import type { NextRequest } from "next/server";
+import { io } from "next/cache";
 import { getSession } from "@/lib/auth";
-import { erreur, lireBody } from "@/lib/api";
+import { erreur, erreurConfigurationSupabase, lireBody } from "@/lib/api";
+import { serviceRoleConfigure } from "@/lib/supabase/server";
 import { enregistrerProjet, getProjets } from "@/lib/store";
 import type { StatutProjet } from "@/lib/types";
 
 const STATUTS: StatutProjet[] = ["en_cours", "termine", "planifie"];
 
 export async function GET() {
+  // Liste toujours à jour : la lecture est exclue du shell statique.
+  await io();
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const projets = await getProjets();
   return Response.json({ projets });
 }
 
 export async function POST(request: NextRequest) {
+  if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
+
   const session = await getSession();
   if (!session) return erreur("Authentification requise.", 401);
   if (session.role !== "tresorier")

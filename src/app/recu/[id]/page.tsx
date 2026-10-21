@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { io } from "next/cache";
 import { BackButton, PrintButton } from "@/components/PrintButton";
 import { Recu } from "@/components/Recu";
 import { getOperation, getProjet } from "@/lib/store";
@@ -27,6 +28,9 @@ export default function Page({
 }
 
 async function Contenu({ params }: { params: Promise<{ id: string }> }) {
+  // Le reçu est calculé à chaque requête : on exclut la lecture de la base
+  // du shell statique (Cache Components).
+  await io();
   const { id } = await params;
   const operation = await getOperation(id);
   if (!operation) notFound();

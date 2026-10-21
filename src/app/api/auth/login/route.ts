@@ -1,8 +1,10 @@
-import { EMAIL_RE, erreur, lireBody } from "@/lib/api";
-import { creerClientServeur } from "@/lib/supabase/server";
+import { EMAIL_RE, erreur, erreurConfigurationSupabase, lireBody } from "@/lib/api";
+import { creerClientServeur, supabaseConfigure } from "@/lib/supabase/server";
 import { trouverProfil } from "@/lib/store";
 
 export async function POST(request: Request) {
+  if (!supabaseConfigure()) return erreurConfigurationSupabase();
+
   const body = await lireBody<{ email?: string; motDePasse?: string }>(request);
   if (!body) return erreur("Corps de requête invalide.");
 

@@ -1,7 +1,9 @@
-import { erreur, lireBody } from "@/lib/api";
-import { creerClientServeur } from "@/lib/supabase/server";
+import { erreur, erreurConfigurationSupabase, lireBody } from "@/lib/api";
+import { creerClientServeur, supabaseConfigure } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
+  if (!supabaseConfigure()) return erreurConfigurationSupabase();
+
   const body = await lireBody<{
     ancienMotDePasse?: string;
     nouveauMotDePasse?: string;
