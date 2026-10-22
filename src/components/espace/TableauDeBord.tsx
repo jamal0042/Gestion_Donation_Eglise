@@ -72,8 +72,8 @@ export function TableauDeBord() {
   const prenom = data.profil?.nom.split(" ")[0] ?? "";
 
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-800 to-brand-600 p-6 text-white sm:p-8">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-800 to-brand-600 p-5 text-white sm:p-8">
         <div
           className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
           aria-hidden
@@ -143,7 +143,7 @@ export function TableauDeBord() {
                 <c.icone size={16} />
               </span>
             </div>
-            <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+            <p className="tabular mt-2 truncate text-xl font-extrabold text-slate-900 sm:mt-3 sm:text-2xl dark:text-slate-100">
               {c.valeur}
             </p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -153,8 +153,8 @@ export function TableauDeBord() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="card p-6 lg:col-span-2">
+      <div className="grid gap-5 lg:grid-cols-3 lg:gap-6">
+        <div className="card p-5 sm:p-6 lg:col-span-2">
           <div className="flex items-center gap-2">
             <CalendarDays size={16} className="text-brand-600 dark:text-brand-300" />
             <h2 className="font-bold text-slate-900 dark:text-slate-100">
@@ -166,10 +166,10 @@ export function TableauDeBord() {
               Aucune donnée pour le moment.
             </p>
           ) : (
-            <div className="mt-6 flex h-40 items-end gap-3">
+            <div className="mt-5 flex h-32 items-end gap-1.5 overflow-hidden sm:mt-6 sm:h-40 sm:gap-3">
               {evolution.map((e) => (
                 <div key={e.mois} className="flex flex-1 flex-col items-center gap-2">
-                  <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                  <span className="truncate text-[9px] font-semibold text-slate-500 sm:text-[10px] dark:text-slate-400">
                     {e.total > 0 ? formatMontant(e.total) : ""}
                   </span>
                   <div
@@ -179,7 +179,7 @@ export function TableauDeBord() {
                     }}
                     title={formatMontant(e.total)}
                   />
-                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <span className="truncate text-[10px] font-medium text-slate-500 sm:text-xs dark:text-slate-400">
                     {e.mois}
                   </span>
                 </div>
@@ -188,7 +188,7 @@ export function TableauDeBord() {
           )}
         </div>
 
-        <div className="card p-6">
+        <div className="card p-5 sm:p-6">
           <h2 className="font-bold text-slate-900 dark:text-slate-100">
             Répartition par type
           </h2>
@@ -221,9 +221,9 @@ export function TableauDeBord() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
         <div className="card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 sm:px-6 dark:border-slate-800">
             <h2 className="font-bold text-slate-900 dark:text-slate-100">
               Mes derniers dons
             </h2>
@@ -235,7 +235,7 @@ export function TableauDeBord() {
             </Link>
           </div>
           {dernieres.length === 0 ? (
-            <p className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
               Vous n&apos;avez pas encore fait de don.{" "}
               <Link
                 href="/offrande"
@@ -249,7 +249,7 @@ export function TableauDeBord() {
               {dernieres.map((o) => (
                 <li
                   key={o.id}
-                  className="flex items-center justify-between gap-3 px-6 py-3"
+                  className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -279,7 +279,7 @@ export function TableauDeBord() {
         </div>
 
         <div className="card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4 sm:px-6 dark:border-slate-800">
             <h2 className="font-bold text-slate-900 dark:text-slate-100">
               Projets que je soutiens
             </h2>
@@ -291,7 +291,7 @@ export function TableauDeBord() {
             </Link>
           </div>
           {projetsSoutenus.length === 0 ? (
-            <p className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+            <p className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
               Vous pouvez flécher un don vers un projet précis.
             </p>
           ) : (
@@ -304,7 +304,7 @@ export function TableauDeBord() {
                   )
                 );
                 return (
-                  <li key={p.projet.id} className="px-6 py-4">
+                  <li key={p.projet.id} className="px-4 py-4 sm:px-6">
                     <div className="flex items-center justify-between gap-2 text-sm">
                       <span className="truncate font-semibold text-slate-800 dark:text-slate-200">
                         {p.projet.nom}

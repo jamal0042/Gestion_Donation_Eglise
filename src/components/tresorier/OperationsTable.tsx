@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
+  ChevronDown,
   Download,
   ExternalLink,
   Filter,
@@ -55,6 +56,7 @@ function Interieur() {
   const [page, setPage] = useState(1);
   const [montrerAjout, setMontrerAjout] = useState(false);
   const [recuOp, setRecuOp] = useState<Operation | null>(null);
+  const [filtresOuverts, setFiltresOuverts] = useState(false);
 
   function charger() {
     Promise.all([
@@ -118,6 +120,16 @@ function Interieur() {
   const filtresActifs =
     q || type || methode || projetId || donateurId || du || au;
 
+  const nbFiltres = [
+    q,
+    type,
+    methode,
+    projetId,
+    donateurId,
+    du,
+    au,
+  ].filter(Boolean).length;
+
   function exporterCsv() {
     const enTete = [
       "N° reçu",
@@ -156,9 +168,9 @@ function Interieur() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl font-extrabold text-slate-900 sm:text-2xl dark:text-slate-100">
             Opérations & reçus
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -169,7 +181,7 @@ function Interieur() {
             au total
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button onClick={exporterCsv} className="btn btn-outline btn-sm">
             <Download size={15} /> Exporter CSV
           </button>
@@ -183,8 +195,34 @@ function Interieur() {
       </div>
 
       <div className="card p-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="min-w-[200px] flex-1">
+        <button
+          type="button"
+          onClick={() => setFiltresOuverts((v) => !v)}
+          aria-expanded={filtresOuverts}
+          aria-controls="filtres-operations"
+          className="btn btn-outline btn-sm w-full justify-between lg:hidden"
+        >
+          <span className="flex items-center gap-2">
+            <Filter size={15} /> Filtres
+            {nbFiltres > 0 && (
+              <span className="chip bg-brand-100 text-brand-700 dark:bg-brand-500/25 dark:text-brand-300">
+                {nbFiltres}
+              </span>
+            )}
+          </span>
+          <ChevronDown
+            size={16}
+            className={`transition-transform ${filtresOuverts ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        <div
+          id="filtres-operations"
+          className={`mt-4 gap-3 pb-1 sm:grid-cols-2 lg:mt-0 lg:grid-cols-4 xl:grid-cols-5 ${
+            filtresOuverts ? "grid" : "hidden lg:grid"
+          }`}
+        >
+          <div className="sm:col-span-2">
             <label className="label" htmlFor="q">Recherche</label>
             <div className="relative">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -295,20 +333,80 @@ function Interieur() {
             />
           </div>
           {filtresActifs && (
-            <button onClick={reinitialiser} className="btn btn-ghost btn-sm">
-              <X size={15} /> Réinitialiser
-            </button>
+            <div className="flex items-end sm:col-span-2 lg:col-span-1">
+              <button onClick={reinitialiser} className="btn btn-ghost btn-sm w-full">
+                <X size={15} /> Réinitialiser
+              </button>
+            </div>
           )}
         </div>
-        <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
-          <Filter size={13} /> Le trésorier peut filtrer par donateur, type de
-          don, méthode de paiement, projet et période.
+        <p className="mt-3 flex items-start gap-1.5 text-xs text-slate-400">
+          <Filter size={13} className="mt-0.5 shrink-0" /> Le trésorier peut filtrer par
+          donateur, type de don, méthode de paiement, projet et période.
         </p>
       </div>
 
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="table-base">
+        {/* Mobile : cartes */}
+        <ul className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">
+          {visibles.length === 0 ? (
+            <li className="px-4 py-14 text-center text-sm text-slate-400">
+              Aucune opération ne correspond aux filtres.
+            </li>
+          ) : (
+            visibles.map((o) => (
+              <li key={o.id} className="px-4 py-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+                      {o.donateurNom}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                      {formatDateCourte(o.date)} ·{" "}
+                      <span className="font-mono">{o.numeroRecu}</span>
+                    </p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="tabular text-sm font-bold text-slate-900 dark:text-slate-100">
+                      {formatMontant(o.montant)}
+                    </p>
+                    <span className="chip mt-1 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      {LIBELLES_TYPE[o.type]}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-2.5 flex items-center justify-between gap-2">
+                  <p className="min-w-0 truncate text-xs text-slate-500 dark:text-slate-400">
+                    {projets.find((p) => p.id === o.projetId)?.nom ?? "Sans projet"} ·{" "}
+                    {LIBELLES_METHODE[o.methode]}
+                  </p>
+                  <div className="flex shrink-0 gap-1">
+                    <button
+                      onClick={() => setRecuOp(o)}
+                      className="btn btn-outline btn-sm btn-square"
+                      title="Aperçu du reçu"
+                      aria-label={`Aperçu du reçu ${o.numeroRecu}`}
+                    >
+                      <Printer size={14} />
+                    </button>
+                    <Link
+                      href={`/recu/${o.id}`}
+                      className="btn btn-ghost btn-sm btn-square"
+                      title="Page d'impression"
+                      aria-label={`Ouvrir le reçu ${o.numeroRecu}`}
+                    >
+                      <ExternalLink size={14} />
+                    </Link>
+                  </div>
+                </div>
+              </li>
+            ))
+          )}
+        </ul>
+
+        {/* Ordinateur : tableau */}
+        <div className="scroll-x hidden md:block">
+          <table className="table-base min-w-[720px]">
             <thead>
               <tr>
                 <th>Date</th>
@@ -335,7 +433,9 @@ function Interieur() {
                     <td className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
                       {o.numeroRecu}
                     </td>
-                    <td className="font-medium text-slate-800 dark:text-slate-200">{o.donateurNom}</td>
+                    <td className="max-w-[200px] truncate font-medium text-slate-800 dark:text-slate-200">
+                      {o.donateurNom}
+                    </td>
                     <td>
                       <span className="chip bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                         {LIBELLES_TYPE[o.type]}
@@ -347,7 +447,7 @@ function Interieur() {
                     <td className="whitespace-nowrap text-slate-500 dark:text-slate-400">
                       {LIBELLES_METHODE[o.methode]}
                     </td>
-                    <td className="text-right font-bold text-slate-900 dark:text-slate-100">
+                    <td className="tabular text-right font-bold text-slate-900 dark:text-slate-100">
                       {formatMontant(o.montant)}
                     </td>
                     <td className="text-right">
@@ -362,8 +462,9 @@ function Interieur() {
                         </button>
                         <Link
                           href={`/recu/${o.id}`}
-                          className="btn btn-ghost btn-sm"
+                          className="btn btn-ghost btn-sm btn-square"
                           title="Page d'impression"
+                          aria-label={`Ouvrir le reçu ${o.numeroRecu}`}
                         >
                           <ExternalLink size={14} />
                         </Link>
@@ -377,7 +478,7 @@ function Interieur() {
         </div>
 
         {nbPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-4 py-3">
+          <div className="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Page {pageCourante} / {nbPages}
             </p>
@@ -385,14 +486,14 @@ function Interieur() {
               <button
                 disabled={pageCourante <= 1}
                 onClick={() => setPage(pageCourante - 1)}
-                className="btn btn-outline btn-sm"
+                className="btn btn-outline btn-sm flex-1 sm:flex-none"
               >
                 Précédent
               </button>
               <button
                 disabled={pageCourante >= nbPages}
                 onClick={() => setPage(pageCourante + 1)}
-                className="btn btn-outline btn-sm"
+                className="btn btn-outline btn-sm flex-1 sm:flex-none"
               >
                 Suivant
               </button>

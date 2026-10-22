@@ -97,8 +97,8 @@ export function QRGenerator() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="card p-6">
+    <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
+      <div className="card p-4 sm:p-6">
         <h2 className="font-bold text-slate-900 dark:text-slate-100">Configurer le QR code</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Générez un QR code qui mène les fidèles au formulaire d&apos;offrande,
@@ -167,7 +167,7 @@ export function QRGenerator() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             {image && (
               <>
                 <a href={image} download="qr-offrande-eglise-bunia.png" className="btn btn-outline btn-sm">
@@ -182,7 +182,7 @@ export function QRGenerator() {
         </div>
       </div>
 
-      <div className="card flex flex-col items-center justify-center p-6">
+      <div className="card flex flex-col items-center justify-center p-4 sm:p-6">
         <h2 className="self-start font-bold text-slate-900 dark:text-slate-100">
           Aperçu du QR code
         </h2>
@@ -191,7 +191,7 @@ export function QRGenerator() {
             <img
               src={image}
               alt="QR code d'offrande"
-              className="mt-5 h-64 w-64 rounded-xl border border-slate-200 dark:border-slate-800 object-contain"
+              className="mt-5 h-52 w-52 rounded-xl sm:h-64 sm:w-64 border border-slate-200 dark:border-slate-800 object-contain"
             />
             <p className="mt-5 max-w-sm text-center text-sm text-slate-500 dark:text-slate-400">
               Affichez ce QR code à l&apos;entrée de l&apos;église, dans les

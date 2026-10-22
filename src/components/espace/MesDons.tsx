@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  ChevronDown,
   Download,
   ExternalLink,
   Filter,
@@ -26,6 +27,7 @@ export function MesDons() {
   const [du, setDu] = useState("");
   const [au, setAu] = useState("");
   const [page, setPage] = useState(1);
+  const [filtresOuverts, setFiltresOuverts] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -78,6 +80,8 @@ export function MesDons() {
 
   const filtresActifs = q || type || projetId || du || au;
 
+  const nbFiltres = [q, type, projetId, du, au].filter(Boolean).length;
+
   function exporterCsv() {
     const enTete = [
       "N° reçu",
@@ -110,9 +114,9 @@ export function MesDons() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl font-extrabold text-slate-900 sm:text-2xl dark:text-slate-100">
             Mes dons
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -122,7 +126,7 @@ export function MesDons() {
             </span>
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button onClick={exporterCsv} className="btn btn-outline btn-sm">
             <Download size={15} /> Exporter CSV
           </button>
@@ -133,8 +137,34 @@ export function MesDons() {
       </div>
 
       <div className="card p-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="min-w-[200px] flex-1">
+        <button
+          type="button"
+          onClick={() => setFiltresOuverts((v) => !v)}
+          aria-expanded={filtresOuverts}
+          aria-controls="filtres-dons"
+          className="btn btn-outline btn-sm w-full justify-between lg:hidden"
+        >
+          <span className="flex items-center gap-2">
+            <Filter size={15} /> Filtres
+            {nbFiltres > 0 && (
+              <span className="chip bg-brand-100 text-brand-700 dark:bg-brand-500/25 dark:text-brand-300">
+                {nbFiltres}
+              </span>
+            )}
+          </span>
+          <ChevronDown
+            size={16}
+            className={`transition-transform ${filtresOuverts ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        <div
+          id="filtres-dons"
+          className={`mt-4 gap-3 pb-1 sm:grid-cols-2 lg:mt-0 lg:grid-cols-5 ${
+            filtresOuverts ? "grid" : "hidden lg:grid"
+          }`}
+        >
+          <div className="sm:col-span-2">
             <label className="label" htmlFor="q">
               Recherche
             </label>
@@ -197,50 +227,105 @@ export function MesDons() {
               ))}
             </select>
           </div>
-          <div>
-            <label className="label" htmlFor="du">
-              Du
-            </label>
-            <input
-              id="du"
-              type="date"
-              className="select"
-              value={du}
-              onChange={(e) => {
-                setDu(e.target.value);
-                setPage(1);
-              }}
-            />
-          </div>
-          <div>
-            <label className="label" htmlFor="au">
-              Au
-            </label>
-            <input
-              id="au"
-              type="date"
-              className="select"
-              value={au}
-              onChange={(e) => {
-                setAu(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="grid grid-cols-2 gap-3 lg:col-span-2">
+            <div>
+              <label className="label" htmlFor="du">
+                Du
+              </label>
+              <input
+                id="du"
+                type="date"
+                className="select"
+                value={du}
+                onChange={(e) => {
+                  setDu(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="au">
+                Au
+              </label>
+              <input
+                id="au"
+                type="date"
+                className="select"
+                value={au}
+                onChange={(e) => {
+                  setAu(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
           </div>
           {filtresActifs && (
-            <button onClick={reinitialiser} className="btn btn-ghost btn-sm">
-              <X size={15} /> Réinitialiser
-            </button>
+            <div className="flex items-end">
+              <button onClick={reinitialiser} className="btn btn-ghost btn-sm w-full">
+                <X size={15} /> Réinitialiser
+              </button>
+            </div>
           )}
-          <p className="flex items-center gap-1.5 text-xs text-slate-400">
-            <Filter size={13} /> Filtrer mes dons
-          </p>
         </div>
       </div>
 
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="table-base">
+        {/* Mobile : cartes */}
+        <ul className="divide-y divide-slate-100 md:hidden dark:divide-slate-800">
+          {visibles.length === 0 ? (
+            <li className="px-4 py-14 text-center text-sm text-slate-400">
+              Aucun don ne correspond aux filtres.
+            </li>
+          ) : (
+            visibles.map((o) => (
+              <li key={o.id} className="px-4 py-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
+                      {LIBELLES_TYPE[o.type]}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                      {formatDateCourte(o.date)} ·{" "}
+                      <span className="font-mono">{o.numeroRecu}</span>
+                    </p>
+                  </div>
+                  <p className="tabular shrink-0 text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {formatMontant(o.montant)}
+                  </p>
+                </div>
+                <div className="mt-2.5 flex items-center justify-between gap-2">
+                  <p className="min-w-0 truncate text-xs text-slate-500 dark:text-slate-400">
+                    {projets.find((p) => p.id === o.projetId)?.nom ?? "Sans projet"} ·{" "}
+                    {LIBELLES_METHODE[o.methode]}
+                  </p>
+                  <div className="flex shrink-0 gap-1">
+                    <Link
+                      href={`/recu/${o.id}`}
+                      className="btn btn-outline btn-sm btn-square"
+                      title="Afficher le reçu"
+                      aria-label={`Afficher le reçu ${o.numeroRecu}`}
+                    >
+                      <Printer size={14} />
+                    </Link>
+                    <Link
+                      href={`/recu/${o.id}`}
+                      className="btn btn-ghost btn-sm btn-square"
+                      title="Ouvrir en plein écran"
+                      aria-label={`Ouvrir le reçu ${o.numeroRecu} en plein écran`}
+                      target="_blank"
+                    >
+                      <ExternalLink size={14} />
+                    </Link>
+                  </div>
+                </div>
+              </li>
+            ))
+          )}
+        </ul>
+
+        {/* Ordinateur : tableau */}
+        <div className="scroll-x hidden md:block">
+          <table className="table-base min-w-[720px]">
             <thead>
               <tr>
                 <th>Date</th>
@@ -279,7 +364,7 @@ export function MesDons() {
                     <td className="whitespace-nowrap text-slate-500 dark:text-slate-400">
                       {LIBELLES_METHODE[o.methode]}
                     </td>
-                    <td className="text-right font-bold text-slate-900 dark:text-slate-100">
+                    <td className="tabular text-right font-bold text-slate-900 dark:text-slate-100">
                       {formatMontant(o.montant)}
                     </td>
                     <td className="text-right">
@@ -294,8 +379,9 @@ export function MesDons() {
                         </Link>
                         <Link
                           href={`/recu/${o.id}`}
-                          className="btn btn-ghost btn-sm"
+                          className="btn btn-ghost btn-sm btn-square"
                           title="Ouvrir en plein écran"
+                          aria-label={`Ouvrir le reçu ${o.numeroRecu} en plein écran`}
                           target="_blank"
                         >
                           <ExternalLink size={14} />
@@ -309,7 +395,7 @@ export function MesDons() {
           </table>
         </div>
         {nbPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-4 py-3">
+          <div className="flex flex-col gap-2 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Page {pageCourante} / {nbPages}
             </p>
@@ -317,14 +403,14 @@ export function MesDons() {
               <button
                 disabled={pageCourante <= 1}
                 onClick={() => setPage(pageCourante - 1)}
-                className="btn btn-outline btn-sm"
+                className="btn btn-outline btn-sm flex-1 sm:flex-none"
               >
                 Précédent
               </button>
               <button
                 disabled={pageCourante >= nbPages}
                 onClick={() => setPage(pageCourante + 1)}
-                className="btn btn-outline btn-sm"
+                className="btn btn-outline btn-sm flex-1 sm:flex-none"
               >
                 Suivant
               </button>

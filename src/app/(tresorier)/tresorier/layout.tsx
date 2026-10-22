@@ -31,10 +31,12 @@ export default function Layout({
 }) {
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
-      <Suspense fallback={null}>
-        <RequireTresorier />
-      </Suspense>
-      <TresorierChrome>{children}</TresorierChrome>
+      <div className="flex min-h-screen">
+        <Suspense fallback={null}>
+          <RequireTresorier />
+        </Suspense>
+        <TresorierChrome>{children}</TresorierChrome>
+      </div>
     </div>
   );
 }

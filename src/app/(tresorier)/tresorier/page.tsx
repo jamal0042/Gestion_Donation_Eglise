@@ -6,13 +6,13 @@ export const metadata: Metadata = { title: "Tableau de bord — Trésorerie" };
 export default function Page() {
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+      <h1 className="text-xl font-extrabold text-slate-900 sm:text-2xl dark:text-slate-100">
         Tableau de bord
       </h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Vue d&apos;ensemble de la trésorerie de l&apos;église.
       </p>
-      <div className="mt-6">
+      <div className="mt-5 sm:mt-6">
         <DashboardClient />
       </div>
     </div>

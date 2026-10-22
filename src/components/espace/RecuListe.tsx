@@ -20,7 +20,7 @@ export function RecuListe() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+        <h1 className="text-xl font-extrabold text-slate-900 sm:text-2xl dark:text-slate-100">
           Mes reçus officiels
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

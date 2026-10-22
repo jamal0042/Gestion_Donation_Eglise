@@ -121,7 +121,7 @@ export function Parametres() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+        <h1 className="text-xl font-extrabold text-slate-900 sm:text-2xl dark:text-slate-100">
           Mon compte
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -141,7 +141,7 @@ export function Parametres() {
             Ces informations apparaissent sur vos reçus.
           </p>
         </div>
-        <div className="grid gap-4 p-6 sm:grid-cols-2">
+        <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-6">
           <div className="sm:col-span-2">
             <label className="label" htmlFor="nom">
               Nom complet
@@ -248,7 +248,7 @@ export function Parametres() {
             Changez votre mot de passe régulièrement.
           </p>
         </div>
-        <div className="grid gap-4 p-6 sm:grid-cols-3">
+        <div className="grid gap-4 p-4 sm:grid-cols-3 sm:p-6">
           <div>
             <label className="label" htmlFor="old">
               Ancien mot de passe
