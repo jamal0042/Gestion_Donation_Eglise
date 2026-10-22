@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { getSession } from "@/lib/auth";
 import EspaceChrome from "@/components/espace/Chrome";
 import { supabaseConfigure } from "@/lib/supabase/server";
@@ -10,10 +11,13 @@ export const instant = false;
 /**
  * Garde d'accès : la lecture de la session est une donnée de requête, elle
  * suspend donc le composant et l'exclut du shell statique (Cache Components).
- * La lecture des cookies doit avoir lieu avant toute redirection, sinon le
- * prerender échoue au lieu de simplement différer le rendu.
+ * `connection()` attend une vraie requête : le client Supabase (qui lit
+ * l'horloge pour valider le JWT) n'est ainsi plus exécuté pendant le
+ * prerender. La lecture doit précéder toute redirection, sinon le prerender
+ * échoue au lieu de simplement différer le rendu.
  */
 async function RequireSession() {
+  await connection();
   const session = await getSession();
   if (!supabaseConfigure()) redirect("/");
   if (!session) redirect("/connexion?next=/espace");
