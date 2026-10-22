@@ -53,7 +53,7 @@ export function Footer() {
             </p>
             <p className="mt-3 text-sm leading-relaxed text-slate-400">
               Une communauté adventiste locale, attachée à la fidélité, à la
-              transparence et au service de notre quartier.
+              transparence et au service de notre environnement.
             </p>
           </div>
 
