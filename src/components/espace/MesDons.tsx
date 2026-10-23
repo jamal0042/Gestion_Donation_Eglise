@@ -11,12 +11,13 @@ import {
   Search,
   X,
 } from "lucide-react";
-import type { Operation, Projet, TypeOffrande } from "@/lib/types";
+import type { Operation, Projet } from "@/lib/types";
 import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
-import { formatDateCourte, formatMontant } from "@/lib/format";
+import { deviseDeType, totalParDevise } from "@/lib/offrandes";
+import { SelectTypeOffrande } from "@/components/SelectTypeOffrande";
+import { formatDateCourte, formatMontantDevise } from "@/lib/format";
 
 const TAILLE_PAGE = 20;
-const TYPES: TypeOffrande[] = ["dime", "offrande", "don", "aumone", "cotisation"];
 
 export function MesDons() {
   const [operations, setOperations] = useState<Operation[]>([]);
@@ -67,7 +68,7 @@ export function MesDons() {
     (pageCourante - 1) * TAILLE_PAGE,
     pageCourante * TAILLE_PAGE
   );
-  const totalFiltre = filtrees.reduce((s, o) => s + o.montant, 0);
+  const totaux = useMemo(() => totalParDevise(filtrees), [filtrees]);
 
   function reinitialiser() {
     setQ("");
@@ -87,15 +88,17 @@ export function MesDons() {
       "N° reçu",
       "Date",
       "Type",
+      "Devise",
       "Méthode",
       "Projet",
-      "Montant ($)",
+      "Montant",
       "Note",
     ];
     const lignes = filtrees.map((o) => [
       o.numeroRecu,
       new Date(o.date).toISOString().slice(0, 10),
       LIBELLES_TYPE[o.type],
+      deviseDeType(o.type),
       LIBELLES_METHODE[o.methode],
       `"${projets.find((p) => p.id === o.projetId)?.nom ?? ""}"`,
       o.montant,
@@ -122,7 +125,10 @@ export function MesDons() {
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {filtrees.length} don{filtrees.length > 1 ? "s" : ""} ·{" "}
             <span className="font-semibold text-brand-700 dark:text-brand-300">
-              {formatMontant(totalFiltre)}
+              {formatMontantDevise(totaux.USD, "USD")}
+            </span>{" "}
+            <span className="font-semibold text-brand-700 dark:text-brand-300">
+              {formatMontantDevise(totaux.CDF, "CDF")}
             </span>
           </p>
         </div>
@@ -189,22 +195,15 @@ export function MesDons() {
             <label className="label" htmlFor="type">
               Type
             </label>
-            <select
+            <SelectTypeOffrande
               id="type"
-              className="select"
               value={type}
-              onChange={(e) => {
-                setType(e.target.value);
+              onChange={(code) => {
+                setType(code);
                 setPage(1);
               }}
-            >
-              <option value="">Tous</option>
-              {TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {LIBELLES_TYPE[t]}
-                </option>
-              ))}
-            </select>
+              placeholder="Tous"
+            />
           </div>
           <div>
             <label className="label" htmlFor="projet">
@@ -290,7 +289,7 @@ export function MesDons() {
                     </p>
                   </div>
                   <p className="tabular shrink-0 text-sm font-bold text-slate-900 dark:text-slate-100">
-                    {formatMontant(o.montant)}
+                    {formatMontantDevise(o.montant, deviseDeType(o.type))}
                   </p>
                 </div>
                 <div className="mt-2.5 flex items-center justify-between gap-2">
@@ -365,7 +364,7 @@ export function MesDons() {
                       {LIBELLES_METHODE[o.methode]}
                     </td>
                     <td className="tabular text-right font-bold text-slate-900 dark:text-slate-100">
-                      {formatMontant(o.montant)}
+                      {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </td>
                     <td className="text-right">
                       <div className="flex justify-end gap-1">

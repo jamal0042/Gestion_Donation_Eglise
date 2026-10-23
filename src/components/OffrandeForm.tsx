@@ -10,14 +10,20 @@ import {
   UserRound,
 } from "lucide-react";
 import type { Operation, Projet, TypeOffrande, MethodePaiement } from "@/lib/types";
-import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
-import { formatMontant } from "@/lib/format";
+import { LIBELLES_METHODE } from "@/lib/types";
+import { deviseDeType } from "@/lib/offrandes";
+import type { Devise } from "@/lib/offrandes";
+import { SelectTypeOffrande } from "@/components/SelectTypeOffrande";
+import { formatMontantDevise } from "@/lib/format";
 
 interface Props {
   projetInitial?: string;
 }
 
-const MONTANTS_RAPIDES = [5, 10, 20, 50, 100];
+const MONTANTS_RAPIDES: Record<Devise, number[]> = {
+  USD: [5, 10, 20, 50, 100],
+  CDF: [500, 1000, 5000, 10000, 50000],
+};
 
 export function OffrandeForm({ projetInitial }: Props) {
   const [projets, setProjets] = useState<Projet[]>([]);
@@ -35,6 +41,9 @@ export function OffrandeForm({ projetInitial }: Props) {
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState("");
   const [resultat, setResultat] = useState<Operation | null>(null);
+
+  const devise = deviseDeType(type);
+  const montantsRapides = MONTANTS_RAPIDES[devise];
 
   useEffect(() => {
     fetch("/api/projets")
@@ -89,7 +98,10 @@ export function OffrandeForm({ projetInitial }: Props) {
         </h2>
         <p className="mt-2 text-slate-600 dark:text-slate-300">
           Votre contribution de{" "}
-          <strong className="text-brand-700 dark:text-brand-300">{formatMontant(resultat.montant)}</strong> a
+          <strong className="text-brand-700 dark:text-brand-300">
+            {formatMontantDevise(resultat.montant, deviseDeType(resultat.type))}
+          </strong>{" "}
+          a
           bien été enregistrée.
         </p>
         <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/15 px-5 py-2 font-mono text-sm font-bold text-brand-700 dark:text-brand-300">
@@ -117,7 +129,7 @@ export function OffrandeForm({ projetInitial }: Props) {
     <form onSubmit={soumettre} className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="label" htmlFor="nom">Nom complet *</label>
+          <label className="label" htmlFor="nom">Nom complet </label>
           <input
             id="nom"
             className="input"
@@ -154,20 +166,15 @@ export function OffrandeForm({ projetInitial }: Props) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="label" htmlFor="type">Type de contribution *</label>
-          <select
+          <label className="label" htmlFor="type">Type de contribution </label>
+          <SelectTypeOffrande
             id="type"
-            className="select"
             value={type}
-            onChange={(e) => setType(e.target.value as TypeOffrande)}
-          >
-            {(Object.keys(LIBELLES_TYPE) as TypeOffrande[]).map((t) => (
-              <option key={t} value={t}>{LIBELLES_TYPE[t]}</option>
-            ))}
-          </select>
+            onChange={(code) => setType(code as TypeOffrande)}
+          />
         </div>
         <div>
-          <label className="label" htmlFor="methode">Méthode de paiement *</label>
+          <label className="label" htmlFor="methode">Méthode de paiement </label>
           <select
             id="methode"
             className="select"
@@ -182,7 +189,7 @@ export function OffrandeForm({ projetInitial }: Props) {
       </div>
 
       <div>
-        <label className="label" htmlFor="montant">Montant (en $) *</label>
+        <label className="label" htmlFor="montant">Montant (en {devise}) </label>
         <input
           id="montant"
           className="input"
@@ -197,7 +204,7 @@ export function OffrandeForm({ projetInitial }: Props) {
           placeholder="0"
         />
         <div className="mt-2 flex flex-wrap gap-2">
-          {MONTANTS_RAPIDES.map((m) => (
+          {montantsRapides.map((m) => (
             <button
               key={m}
               type="button"
@@ -208,7 +215,7 @@ export function OffrandeForm({ projetInitial }: Props) {
                   : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-brand-400"
               }`}
             >
-              ${m}
+              {m} {devise}
             </button>
           ))}
         </div>
@@ -240,7 +247,7 @@ export function OffrandeForm({ projetInitial }: Props) {
           className="textarea"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Ex : Merci pour le culte de ce dimanche"
+          placeholder="Ex : Merci pour le culte de ce samedi."
         />
       </div>
 
@@ -264,7 +271,7 @@ export function OffrandeForm({ projetInitial }: Props) {
               className="input"
               type="email"
               required
-              placeholder="E-mail pour votre compte *"
+              placeholder="E-mail pour votre compte "
               value={emailCompte}
               onChange={(e) => setEmailCompte(e.target.value)}
             />
@@ -273,7 +280,7 @@ export function OffrandeForm({ projetInitial }: Props) {
               type="password"
               required
               minLength={8}
-              placeholder="Mot de passe (8 caractères min.) *"
+              placeholder="Mot de passe (8 caractères min.) "
               value={motDePasseCompte}
               onChange={(e) => setMotDePasseCompte(e.target.value)}
             />
@@ -297,7 +304,10 @@ export function OffrandeForm({ projetInitial }: Props) {
         ) : (
           <>
             <Heart size={18} />
-            Donner {typeof montant === "number" && montant > 0 ? formatMontant(montant) : ""}
+            Donner{" "}
+            {typeof montant === "number" && montant > 0
+              ? formatMontantDevise(montant, devise)
+              : ""}
           </>
         )}
       </button>

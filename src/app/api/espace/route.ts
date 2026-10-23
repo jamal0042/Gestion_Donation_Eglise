@@ -7,6 +7,8 @@ import {
   trouverProfil,
 } from "@/lib/store";
 import type { Operation, Projet, TypeOffrande } from "@/lib/types";
+import { deviseDeType } from "@/lib/offrandes";
+import type { Devise } from "@/lib/offrandes";
 
 export interface ProjetSoutenu {
   projet: Projet;
@@ -26,6 +28,15 @@ export interface MoisStat {
   total: number;
 }
 
+export interface TotalDevise {
+  devise: Devise;
+  totalGeneral: number;
+  totalAnnee: number;
+  totalMois: number;
+  donMoyen: number;
+  nombre: number;
+}
+
 export async function GET() {
   if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
 
@@ -39,6 +50,7 @@ export async function GET() {
       projetsSoutenus: [] as ProjetSoutenu[],
       repartition: [] as RepartitionType[],
       evolution: [] as MoisStat[],
+      parDevise: [] as TotalDevise[],
       statistiques: {
         totalGeneral: 0,
         totalAnnee: 0,
@@ -52,6 +64,7 @@ export async function GET() {
     });
   }
 
+
   const [profil, operations, projets] = await Promise.all([
     trouverProfil(session.sub),
     getOperationsDonateur(session.donateurId),
@@ -62,16 +75,42 @@ export async function GET() {
   const moisCourant = maintenant.getMonth();
   const anneeCourante = maintenant.getFullYear();
 
-  const totalGeneral = operations.reduce((s, o) => s + o.montant, 0);
-  const totalAnnee = operations
-    .filter((o) => new Date(o.date).getFullYear() === anneeCourante)
-    .reduce((s, o) => s + o.montant, 0);
-  const totalMois = operations
-    .filter((o) => {
-      const d = new Date(o.date);
-      return d.getMonth() === moisCourant && d.getFullYear() === anneeCourante;
-    })
-    .reduce((s, o) => s + o.montant, 0);
+  // Les montants en CDF et en USD ne sont jamais additionnés : les totaux
+  // principaux restent exprimés en dollars, le détail CDF est fourni à part.
+  const dansLeMois = (date: string) => {
+    const d = new Date(date);
+    return d.getMonth() === moisCourant && d.getFullYear() === anneeCourante;
+  };
+
+  const parDeviseMap = new Map<Devise, TotalDevise>();
+  for (const o of operations) {
+    const devise = deviseDeType(o.type);
+    const courant = parDeviseMap.get(devise) ?? {
+      devise,
+      totalGeneral: 0,
+      totalAnnee: 0,
+      totalMois: 0,
+      donMoyen: 0,
+      nombre: 0,
+    };
+    courant.totalGeneral += o.montant;
+    if (new Date(o.date).getFullYear() === anneeCourante)
+      courant.totalAnnee += o.montant;
+    if (dansLeMois(o.date)) courant.totalMois += o.montant;
+    courant.nombre += 1;
+    parDeviseMap.set(devise, courant);
+  }
+  for (const total of parDeviseMap.values()) {
+    total.donMoyen = total.nombre > 0 ? total.totalGeneral / total.nombre : 0;
+  }
+  const parDevise = [...parDeviseMap.values()].sort((a, b) =>
+    a.devise.localeCompare(b.devise)
+  );
+
+  const usd = parDeviseMap.get("USD");
+  const totalGeneral = usd?.totalGeneral ?? 0;
+  const totalAnnee = usd?.totalAnnee ?? 0;
+  const totalMois = usd?.totalMois ?? 0;
 
   const repartitionMap = new Map<TypeOffrande, RepartitionType>();
   for (const o of operations) {
@@ -107,7 +146,7 @@ export async function GET() {
   }
   projetsSoutenus.sort((a, b) => b.total - a.total);
 
-  // Évolution des 6 derniers mois.
+  // Évolution des 6 derniers mois (en dollars, pour rester comparable).
   const evolution: MoisStat[] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(anneeCourante, moisCourant - i, 1);
@@ -115,7 +154,9 @@ export async function GET() {
       .filter((o) => {
         const od = new Date(o.date);
         return (
-          od.getMonth() === d.getMonth() && od.getFullYear() === d.getFullYear()
+          deviseDeType(o.type) === "USD" &&
+          od.getMonth() === d.getMonth() &&
+          od.getFullYear() === d.getFullYear()
         );
       })
       .reduce((s, o) => s + o.montant, 0);
@@ -135,13 +176,14 @@ export async function GET() {
     projetsSoutenus,
     repartition: [...repartitionMap.values()].sort((a, b) => b.total - a.total),
     evolution,
+    parDevise,
     statistiques: {
       totalGeneral,
       totalAnnee,
       totalMois,
       nbOperations: operations.length,
       nbProjetsSoutenus: projetsSoutenus.length,
-      donMoyen: operations.length > 0 ? totalGeneral / operations.length : 0,
+      donMoyen: usd?.donMoyen ?? 0,
       premierDon: dates.length > 0 ? new Date(dates[0]).toISOString() : null,
       dernierDon:
         dates.length > 0

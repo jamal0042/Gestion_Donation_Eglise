@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import type { Operation, Projet } from "@/lib/types";
 import { LIBELLES_TYPE } from "@/lib/types";
-import { formatDateCourte, formatMontant } from "@/lib/format";
+import { deviseDeType } from "@/lib/offrandes";
+import { formatDateCourte, formatMontant, formatMontantDevise } from "@/lib/format";
 
 interface Stats {
   totalMois: number;
@@ -24,6 +25,13 @@ interface Stats {
   nbDonateurs: number;
   nbProjetsActifs: number;
   parType: { type: keyof typeof LIBELLES_TYPE; total: number; nombre: number }[];
+  parDevise: {
+    devise: "CDF" | "USD";
+    totalMois: number;
+    totalAnnee: number;
+    totalGeneral: number;
+    nombre: number;
+  }[];
 }
 
 export function DashboardClient() {
@@ -48,15 +56,29 @@ export function DashboardClient() {
   const dernieres = operations.slice(0, 8);
   const maxType = Math.max(1, ...(stats?.parType.map((p) => p.total) ?? [1]));
 
+  const cdf = stats?.parDevise.find((p) => p.devise === "CDF");
+
+  const cartes = [
+    {
+      label: "Reçu ce mois-ci",
+      valeur: stats?.totalMois,
+      icone: DollarSign,
+      sous: cdf && cdf.totalMois > 0 ? formatMontantDevise(cdf.totalMois, "CDF") : null,
+    },
+    {
+      label: "Reçu cette année",
+      valeur: stats?.totalAnnee,
+      icone: HandCoins,
+      sous: cdf && cdf.totalAnnee > 0 ? formatMontantDevise(cdf.totalAnnee, "CDF") : null,
+    },
+    { label: "Opérations", valeur: stats?.nbOperations, icone: ReceiptText, sous: null },
+    { label: "Donateurs", valeur: stats?.nbDonateurs, icone: Users, sous: null },
+  ];
+
   return (
     <div className="space-y-5 sm:space-y-6">
       <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
-        {[
-          { label: "Reçu ce mois-ci", valeur: stats?.totalMois, icone: DollarSign },
-          { label: "Reçu cette année", valeur: stats?.totalAnnee, icone: HandCoins },
-          { label: "Opérations", valeur: stats?.nbOperations, icone: ReceiptText },
-          { label: "Donateurs", valeur: stats?.nbDonateurs, icone: Users },
-        ].map((c) => (
+        {cartes.map((c) => (
           <div key={c.label} className="card p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs dark:text-slate-400">
@@ -73,6 +95,11 @@ export function DashboardClient() {
                 ? formatMontant(c.valeur)
                 : c.valeur.toLocaleString("fr-FR")}
             </p>
+            {c.sous && (
+              <p className="tabular mt-0.5 truncate text-xs font-semibold text-brand-600 dark:text-brand-300">
+                + {c.sous}
+              </p>
+            )}
           </div>
         ))}
       </div>
@@ -103,7 +130,7 @@ export function DashboardClient() {
                       {LIBELLES_TYPE[p.type]}
                     </span>
                     <span className="shrink-0 text-slate-500 dark:text-slate-400">
-                      {formatMontant(p.total)}{" "}
+                      {formatMontantDevise(p.total, deviseDeType(p.type))}{" "}
                       <span className="text-xs text-slate-400">
                         ({p.nombre} op.)
                       </span>
@@ -200,7 +227,7 @@ export function DashboardClient() {
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="tabular text-sm font-bold text-slate-900 dark:text-slate-100">
-                      {formatMontant(o.montant)}
+                      {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </p>
                     <Link
                       href={`/recu/${o.id}`}
@@ -247,7 +274,7 @@ export function DashboardClient() {
                     </td>
                     <td>{LIBELLES_TYPE[o.type]}</td>
                     <td className="tabular text-right font-bold text-slate-900 dark:text-slate-100">
-                      {formatMontant(o.montant)}
+                      {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </td>
                     <td className="text-right">
                       <Link

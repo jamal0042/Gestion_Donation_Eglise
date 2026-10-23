@@ -1,11 +1,11 @@
+import type { CodeOffrande } from "./offrandes";
+import { LIBELLES_TYPE as LIBELLES_OFFRANDES } from "./offrandes";
+
+export type { CodeOffrande };
+
 export type Role = "tresorier" | "membre";
 
-export type TypeOffrande =
-  | "dime"
-  | "offrande"
-  | "don"
-  | "aumone"
-  | "cotisation";
+export type TypeOffrande = CodeOffrande;
 
 export type MethodePaiement =
   | "especes"
@@ -66,13 +66,7 @@ export interface SessionPayload {
   donateurId?: string;
 }
 
-export const LIBELLES_TYPE: Record<TypeOffrande, string> = {
-  dime: "Dîme",
-  offrande: "Offrande",
-  don: "Don",
-  aumone: "Aumône",
-  cotisation: "Cotisation",
-};
+export const LIBELLES_TYPE: Record<TypeOffrande, string> = LIBELLES_OFFRANDES;
 
 export const LIBELLES_METHODE: Record<MethodePaiement, string> = {
   especes: "Espèces",

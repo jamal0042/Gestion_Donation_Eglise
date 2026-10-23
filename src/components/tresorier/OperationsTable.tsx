@@ -21,12 +21,13 @@ import type {
   MethodePaiement,
 } from "@/lib/types";
 import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
-import { formatDateCourte, formatMontant } from "@/lib/format";
+import { deviseDeType, totalParDevise } from "@/lib/offrandes";
+import { SelectTypeOffrande } from "@/components/SelectTypeOffrande";
+import { formatDateCourte, formatMontantDevise } from "@/lib/format";
 import { Recu } from "@/components/Recu";
 import { PrintButton } from "@/components/PrintButton";
 
 const TAILLE_PAGE = 15;
-const TYPES: TypeOffrande[] = ["dime", "offrande", "don", "aumone", "cotisation"];
 const METHODES: MethodePaiement[] = ["especes", "mobile_money", "virement", "cheque"];
 
 export default function OperationsTable() {
@@ -98,7 +99,7 @@ function Interieur() {
     return liste;
   }, [operations, q, type, methode, projetId, donateurId, du, au]);
 
-  const totalFiltre = filtrees.reduce((s, o) => s + o.montant, 0);
+  const totaux = useMemo(() => totalParDevise(filtrees), [filtrees]);
   const nbPages = Math.max(1, Math.ceil(filtrees.length / TAILLE_PAGE));
   const pageCourante = Math.min(page, nbPages);
   const visibles = filtrees.slice(
@@ -136,9 +137,10 @@ function Interieur() {
       "Date",
       "Donateur",
       "Type",
+      "Devise",
       "Méthode",
       "Projet",
-      "Montant ($)",
+      "Montant",
       "Note",
     ];
     const lignes = filtrees.map((o) => [
@@ -146,6 +148,7 @@ function Interieur() {
       new Date(o.date).toISOString().slice(0, 10),
       `"${o.donateurNom}"`,
       LIBELLES_TYPE[o.type],
+      deviseDeType(o.type),
       LIBELLES_METHODE[o.methode],
       `"${projets.find((p) => p.id === o.projetId)?.nom ?? ""}"`,
       o.montant,
@@ -176,7 +179,10 @@ function Interieur() {
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {filtrees.length} résultat{filtrees.length > 1 ? "s" : ""} ·{" "}
             <span className="font-semibold text-brand-700 dark:text-brand-300">
-              {formatMontant(totalFiltre)}
+              {formatMontantDevise(totaux.USD, "USD")}
+            </span>{" "}
+            <span className="font-semibold text-brand-700 dark:text-brand-300">
+              {formatMontantDevise(totaux.CDF, "CDF")}
             </span>{" "}
             au total
           </p>
@@ -240,20 +246,15 @@ function Interieur() {
           </div>
           <div>
             <label className="label" htmlFor="type">Type</label>
-            <select
+            <SelectTypeOffrande
               id="type"
-              className="select"
               value={type}
-              onChange={(e) => {
-                setType(e.target.value);
+              onChange={(code) => {
+                setType(code);
                 setPage(1);
               }}
-            >
-              <option value="">Tous</option>
-              {TYPES.map((t) => (
-                <option key={t} value={t}>{LIBELLES_TYPE[t]}</option>
-              ))}
-            </select>
+              placeholder="Tous"
+            />
           </div>
           <div>
             <label className="label" htmlFor="methode">Méthode</label>
@@ -368,7 +369,7 @@ function Interieur() {
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="tabular text-sm font-bold text-slate-900 dark:text-slate-100">
-                      {formatMontant(o.montant)}
+                      {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </p>
                     <span className="chip mt-1 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                       {LIBELLES_TYPE[o.type]}
@@ -448,7 +449,7 @@ function Interieur() {
                       {LIBELLES_METHODE[o.methode]}
                     </td>
                     <td className="tabular text-right font-bold text-slate-900 dark:text-slate-100">
-                      {formatMontant(o.montant)}
+                      {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </td>
                     <td className="text-right">
                       <div className="flex justify-end gap-1">
@@ -543,6 +544,8 @@ function AjoutModal({
   const [erreur, setErreur] = useState("");
   const [enCours, setEnCours] = useState(false);
 
+  const devise = deviseDeType(type);
+
   async function soumettre(e: React.FormEvent) {
     e.preventDefault();
     setErreur("");
@@ -608,7 +611,7 @@ function AjoutModal({
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="label" htmlFor="aj-montant">Montant ($) *</label>
+              <label className="label" htmlFor="aj-montant">Montant (en {devise}) *</label>
               <input
                 id="aj-montant"
                 className="input"
@@ -634,16 +637,11 @@ function AjoutModal({
             </div>
             <div>
               <label className="label" htmlFor="aj-type">Type</label>
-              <select
+              <SelectTypeOffrande
                 id="aj-type"
-                className="select"
                 value={type}
-                onChange={(e) => setType(e.target.value as TypeOffrande)}
-              >
-                {TYPES.map((t) => (
-                  <option key={t} value={t}>{LIBELLES_TYPE[t]}</option>
-                ))}
-              </select>
+                onChange={(code) => setType(code as TypeOffrande)}
+              />
             </div>
             <div>
               <label className="label" htmlFor="aj-methode">Méthode</label>

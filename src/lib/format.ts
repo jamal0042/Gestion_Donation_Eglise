@@ -1,8 +1,23 @@
+import type { Devise } from "./offrandes";
+
 export function formatMontant(montant: number): string {
   return `${montant.toLocaleString("fr-FR", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   })} $`;
+}
+
+/** Montant accompagné de sa devise (CDF ou USD). */
+export function formatMontantDevise(montant: number, devise: Devise): string {
+  return `${montant.toLocaleString("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })} ${devise}`;
+}
+
+/** Nom de la devise en toutes lettres (pour le montant écrit). */
+export function deviseEnLettres(devise: Devise): string {
+  return devise === "CDF" ? "francs congolais" : "dollars";
 }
 
 export function formatDate(dateIso: string): string {
@@ -97,7 +112,6 @@ export function montantEnLettres(montant: number): string {
 
   const entier = Math.floor(montant);
   const decimal = Math.round((montant - entier) * 100);
-  const principal = nombre(entier) + " dollar" + (entier > 1 ? "s" : "");
-  if (decimal === 0) return principal;
-  return `${principal} et ${nombre(decimal)} cent${decimal > 1 ? "s" : ""}`;
+  if (decimal === 0) return nombre(entier);
+  return `${nombre(entier)} et ${nombre(decimal)} cent${decimal > 1 ? "s" : ""}`;
 }

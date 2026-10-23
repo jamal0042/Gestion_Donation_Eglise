@@ -19,14 +19,8 @@ import {
   trouverOuCreerDonateur,
 } from "@/lib/store";
 import type { MethodePaiement, TypeOffrande } from "@/lib/types";
+import { estCodeOffrande } from "@/lib/offrandes";
 
-const TYPES: TypeOffrande[] = [
-  "dime",
-  "offrande",
-  "don",
-  "aumone",
-  "cotisation",
-];
 const METHODES: MethodePaiement[] = [
   "especes",
   "mobile_money",
@@ -65,7 +59,7 @@ export async function GET(request: NextRequest) {
   }
 
   const type = sp.get("type");
-  if (type && TYPES.includes(type as TypeOffrande)) {
+  if (type && estCodeOffrande(type)) {
     operations = operations.filter((o) => o.type === type);
   }
 
@@ -130,7 +124,7 @@ export async function POST(request: Request) {
   if (nom.length < 2) return erreur("Veuillez indiquer votre nom complet.");
   if (!Number.isFinite(montant) || montant <= 0)
     return erreur("Le montant doit être supérieur à 0.");
-  if (!TYPES.includes(type)) return erreur("Type d'offrande invalide.");
+  if (!estCodeOffrande(type)) return erreur("Type d'offrande invalide.");
   if (!METHODES.includes(methode)) return erreur("Méthode de paiement invalide.");
 
   const donateur = await trouverOuCreerDonateur({
@@ -139,17 +133,29 @@ export async function POST(request: Request) {
     email: body.email?.trim() || undefined,
   });
 
-  const operation = await ajouterOperation({
-    date: body.date ? new Date(body.date).toISOString() : new Date().toISOString(),
-    montant,
-    type,
-    methode,
-    donateurId: donateur.id,
-    donateurNom: donateur.nom,
-    projetId: body.projetId || null,
-    note: body.note?.trim() || undefined,
-    creePar: "Don en ligne",
-  });
+  let operation;
+  try {
+    operation = await ajouterOperation({
+      date: body.date ? new Date(body.date).toISOString() : new Date().toISOString(),
+      montant,
+      type,
+      methode,
+      donateurId: donateur.id,
+      donateurNom: donateur.nom,
+      projetId: body.projetId || null,
+      note: body.note?.trim() || undefined,
+      creePar: "Don en ligne",
+    });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "";
+    if (message.includes("invalid input value for enum")) {
+      return erreur(
+        "Ce type d'offrande n'est pas encore activé dans la base. Exécutez la migration supabase/migrations/0002_types_offrande.sql dans Supabase.",
+        400
+      );
+    }
+    throw e;
+  }
 
   if (body.projetId) await reinitialiserCollecte(body.projetId);
 

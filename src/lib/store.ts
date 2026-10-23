@@ -6,6 +6,8 @@ import type {
   TypeOffrande,
   Utilisateur,
 } from "./types";
+import { deviseDeType } from "./offrandes";
+import type { Devise } from "./offrandes";
 import type { Database } from "./database.types";
 import { creerClientAdmin } from "./supabase/server";
 
@@ -310,6 +312,7 @@ export async function majDonateur(
 // Statistiques
 // ---------------------------------------------------------------------------
 export interface Statistiques {
+  /** Totaux en dollars (les montants en CDF ne sont jamais additionnés). */
   totalMois: number;
   totalAnnee: number;
   totalGeneral: number;
@@ -317,6 +320,13 @@ export interface Statistiques {
   nbDonateurs: number;
   nbProjetsActifs: number;
   parType: { type: TypeOffrande; total: number; nombre: number }[];
+  parDevise: {
+    devise: Devise;
+    totalMois: number;
+    totalAnnee: number;
+    totalGeneral: number;
+    nombre: number;
+  }[];
 }
 
 export async function getStatistiques(): Promise<Statistiques> {
@@ -330,18 +340,40 @@ export async function getStatistiques(): Promise<Statistiques> {
   const moisCourant = maintenant.getMonth();
   const anneeCourante = maintenant.getFullYear();
 
-  const totalMois = operations
-    .filter((o) => {
-      const d = new Date(o.date);
-      return (
-        d.getMonth() === moisCourant && d.getFullYear() === anneeCourante
-      );
-    })
-    .reduce((s, o) => s + o.montant, 0);
+  const parDeviseMap = new Map<
+    Devise,
+    {
+      devise: Devise;
+      totalMois: number;
+      totalAnnee: number;
+      totalGeneral: number;
+      nombre: number;
+    }
+  >();
 
-  const totalAnnee = operations
-    .filter((o) => new Date(o.date).getFullYear() === anneeCourante)
-    .reduce((s, o) => s + o.montant, 0);
+  for (const o of operations) {
+    const devise = deviseDeType(o.type);
+    const courant = parDeviseMap.get(devise) ?? {
+      devise,
+      totalMois: 0,
+      totalAnnee: 0,
+      totalGeneral: 0,
+      nombre: 0,
+    };
+    const d = new Date(o.date);
+    if (d.getMonth() === moisCourant && d.getFullYear() === anneeCourante)
+      courant.totalMois += o.montant;
+    if (d.getFullYear() === anneeCourante) courant.totalAnnee += o.montant;
+    courant.totalGeneral += o.montant;
+    courant.nombre += 1;
+    parDeviseMap.set(devise, courant);
+  }
+
+  const parDevise = [...parDeviseMap.values()].sort((a, b) =>
+    a.devise.localeCompare(b.devise)
+  );
+
+  const usd = parDeviseMap.get("USD");
 
   const parTypeMap = new Map<
     string,
@@ -359,12 +391,13 @@ export async function getStatistiques(): Promise<Statistiques> {
   }
 
   return {
-    totalMois,
-    totalAnnee,
-    totalGeneral: operations.reduce((s, o) => s + o.montant, 0),
+    totalMois: usd?.totalMois ?? 0,
+    totalAnnee: usd?.totalAnnee ?? 0,
+    totalGeneral: usd?.totalGeneral ?? 0,
     nbOperations: operations.length,
     nbDonateurs: donneurs.length,
     nbProjetsActifs: projets.filter((p) => p.statut === "en_cours").length,
     parType: [...parTypeMap.values()].sort((a, b) => b.total - a.total),
+    parDevise,
   };
 }

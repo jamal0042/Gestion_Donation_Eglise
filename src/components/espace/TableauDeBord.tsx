@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import type { Operation, Projet, TypeOffrande } from "@/lib/types";
 import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
-import { formatDateCourte, formatMontant } from "@/lib/format";
+import { deviseDeType } from "@/lib/offrandes";
+import { formatDateCourte, formatMontant, formatMontantDevise } from "@/lib/format";
 
 interface Espace {
   profil: { nom: string } | null;
@@ -26,6 +27,14 @@ interface Espace {
   }[];
   repartition: { type: TypeOffrande; total: number; nombre: number }[];
   evolution: { mois: string; total: number }[];
+  parDevise: {
+    devise: "CDF" | "USD";
+    totalGeneral: number;
+    totalAnnee: number;
+    totalMois: number;
+    donMoyen: number;
+    nombre: number;
+  }[];
   statistiques: {
     totalGeneral: number;
     totalAnnee: number;
@@ -66,6 +75,7 @@ export function TableauDeBord() {
 
   const { statistiques: s, operations, repartition, evolution, projetsSoutenus } =
     data;
+  const cdf = data.parDevise?.find((p) => p.devise === "CDF");
   const maxEvolution = Math.max(1, ...evolution.map((e) => e.total));
   const maxRepartition = Math.max(1, ...repartition.map((r) => r.total));
   const dernieres = operations.slice(0, 5);
@@ -109,13 +119,21 @@ export function TableauDeBord() {
             label: "Total donné",
             valeur: formatMontant(s.totalGeneral),
             icone: Wallet,
-            sous: `${s.nbOperations} contribution${s.nbOperations > 1 ? "s" : ""}`,
+            sous: `${s.nbOperations} contribution${s.nbOperations > 1 ? "s" : ""}${
+              cdf && cdf.totalGeneral > 0
+                ? ` · ${formatMontantDevise(cdf.totalGeneral, "CDF")}`
+                : ""
+            }`,
           },
           {
             label: "Cette année",
             valeur: formatMontant(s.totalAnnee),
             icone: TrendingUp,
-            sous: `Ce mois : ${formatMontant(s.totalMois)}`,
+            sous: `Ce mois : ${formatMontant(s.totalMois)}${
+              cdf && cdf.totalAnnee > 0
+                ? ` · ${formatMontantDevise(cdf.totalAnnee, "CDF")}`
+                : ""
+            }`,
           },
           {
             label: "Don moyen",
@@ -158,7 +176,7 @@ export function TableauDeBord() {
           <div className="flex items-center gap-2">
             <CalendarDays size={16} className="text-brand-600 dark:text-brand-300" />
             <h2 className="font-bold text-slate-900 dark:text-slate-100">
-              Évolution de mes dons (6 derniers mois)
+              Évolution de mes dons en USD (6 derniers mois)
             </h2>
           </div>
           {s.nbOperations === 0 ? (
@@ -205,7 +223,7 @@ export function TableauDeBord() {
                       {LIBELLES_TYPE[r.type]}
                     </span>
                     <span className="text-slate-500 dark:text-slate-400">
-                      {formatMontant(r.total)}
+                      {formatMontantDevise(r.total, deviseDeType(r.type))}
                     </span>
                   </div>
                   <div className="progress-track">
@@ -263,7 +281,7 @@ export function TableauDeBord() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                      {formatMontant(o.montant)}
+                      {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </p>
                     <Link
                       href={`/recu/${o.id}`}

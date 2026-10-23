@@ -5,7 +5,8 @@ import Link from "next/link";
 import { FileText, Printer } from "lucide-react";
 import type { Operation } from "@/lib/types";
 import { LIBELLES_TYPE } from "@/lib/types";
-import { formatDate, formatMontant } from "@/lib/format";
+import { deviseDeType } from "@/lib/offrandes";
+import { formatDate, formatMontantDevise } from "@/lib/format";
 
 export function RecuListe() {
   const [operations, setOperations] = useState<Operation[]>([]);
@@ -61,7 +62,7 @@ export function RecuListe() {
                 </span>
               </div>
               <p className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-slate-100">
-                {formatMontant(o.montant)}
+                {formatMontantDevise(o.montant, deviseDeType(o.type))}
               </p>
               <div className="mt-5 flex gap-2">
                 <Link
