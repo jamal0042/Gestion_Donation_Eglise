@@ -7,7 +7,7 @@ import {
   trouverProfil,
 } from "@/lib/store";
 import type { Operation, Projet, TypeOffrande } from "@/lib/types";
-import { deviseDeType } from "@/lib/offrandes";
+import { deviseDeType, detailOperation } from "@/lib/offrandes";
 import type { Devise } from "@/lib/offrandes";
 
 export interface ProjetSoutenu {
@@ -114,14 +114,17 @@ export async function GET() {
 
   const repartitionMap = new Map<TypeOffrande, RepartitionType>();
   for (const o of operations) {
-    const courant = repartitionMap.get(o.type) ?? {
-      type: o.type,
-      total: 0,
-      nombre: 0,
-    };
-    courant.total += o.montant;
-    courant.nombre += 1;
-    repartitionMap.set(o.type, courant);
+    for (const ligne of detailOperation(o)) {
+      const type = ligne.type as TypeOffrande;
+      const courant = repartitionMap.get(type) ?? {
+        type,
+        total: 0,
+        nombre: 0,
+      };
+      courant.total += ligne.montant;
+      courant.nombre += 1;
+      repartitionMap.set(type, courant);
+    }
   }
 
   const parProjet = new Map<string, { total: number; nbDons: number }>();

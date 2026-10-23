@@ -21,7 +21,11 @@ import type {
   MethodePaiement,
 } from "@/lib/types";
 import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
-import { deviseDeType, totalParDevise } from "@/lib/offrandes";
+import { convertirDevise, detailOperation, deviseDeType, totalParDevise } from "@/lib/offrandes";
+import type { Devise } from "@/lib/offrandes";
+import { TypeContribution } from "@/components/TypeContribution";
+import { LignesOffrande, SelecteurDevise, totalSaisie } from "@/components/LignesOffrande";
+import type { LigneSaisie } from "@/components/LignesOffrande";
 import { SelectTypeOffrande } from "@/components/SelectTypeOffrande";
 import { formatDateCourte, formatMontantDevise } from "@/lib/format";
 import { Recu } from "@/components/Recu";
@@ -86,7 +90,12 @@ function Interieur() {
           o.numeroRecu.toLowerCase().includes(ql) ||
           (o.note ?? "").toLowerCase().includes(ql)
       );
-    if (type) liste = liste.filter((o) => o.type === type);
+    if (type)
+      liste = liste.filter(
+        (o) =>
+          o.type === type ||
+          (o.lignes ?? []).some((ligne) => ligne.type === type)
+      );
     if (methode) liste = liste.filter((o) => o.methode === methode);
     if (projetId) liste = liste.filter((o) => o.projetId === projetId);
     if (donateurId) liste = liste.filter((o) => o.donateurId === donateurId);
@@ -141,19 +150,25 @@ function Interieur() {
       "Méthode",
       "Projet",
       "Montant",
+      "Total du reçu",
       "Note",
     ];
-    const lignes = filtrees.map((o) => [
-      o.numeroRecu,
-      new Date(o.date).toISOString().slice(0, 10),
-      `"${o.donateurNom}"`,
-      LIBELLES_TYPE[o.type],
-      deviseDeType(o.type),
-      LIBELLES_METHODE[o.methode],
-      `"${projets.find((p) => p.id === o.projetId)?.nom ?? ""}"`,
-      o.montant,
-      `"${(o.note ?? "").replace(/\n/g, " ")}"`,
-    ]);
+    const lignes = filtrees.flatMap((o) => {
+      const projet = `"${projets.find((p) => p.id === o.projetId)?.nom ?? ""}"`;
+      const note = `"${(o.note ?? "").replace(/\n/g, " ")}"`;
+      return detailOperation(o).map((ligne) => [
+        o.numeroRecu,
+        new Date(o.date).toISOString().slice(0, 10),
+        `"${o.donateurNom}"`,
+        LIBELLES_TYPE[ligne.type as TypeOffrande],
+        deviseDeType(ligne.type),
+        LIBELLES_METHODE[o.methode],
+        projet,
+        ligne.montant,
+        o.montant,
+        note,
+      ]);
+    });
     const csv = [enTete, ...lignes].map((l) => l.join(";")).join("\n");
     const url = URL.createObjectURL(
       new Blob(["\uFEFF" + csv], {
@@ -371,8 +386,8 @@ function Interieur() {
                     <p className="tabular text-sm font-bold text-slate-900 dark:text-slate-100">
                       {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </p>
-                    <span className="chip mt-1 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                      {LIBELLES_TYPE[o.type]}
+                    <span className="mt-1 inline-block">
+                      <TypeContribution operation={o} />
                     </span>
                   </div>
                 </div>
@@ -438,9 +453,7 @@ function Interieur() {
                       {o.donateurNom}
                     </td>
                     <td>
-                      <span className="chip bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                        {LIBELLES_TYPE[o.type]}
-                      </span>
+                      <TypeContribution operation={o} />
                     </td>
                     <td className="max-w-[140px] truncate text-slate-500 dark:text-slate-400">
                       {projets.find((p) => p.id === o.projetId)?.nom ?? "—"}
@@ -535,8 +548,10 @@ function AjoutModal({
   onCree: () => void;
 }) {
   const [nom, setNom] = useState("");
-  const [montant, setMontant] = useState<number | "">("");
-  const [type, setType] = useState<TypeOffrande>("offrande");
+  const [devise, setDevise] = useState<Devise>("USD");
+  const [lignes, setLignes] = useState<LigneSaisie[]>([
+    { type: "offrande", montant: "" },
+  ]);
   const [methode, setMethode] = useState<MethodePaiement>("especes");
   const [projetId, setProjetId] = useState("");
   const [note, setNote] = useState("");
@@ -544,11 +559,31 @@ function AjoutModal({
   const [erreur, setErreur] = useState("");
   const [enCours, setEnCours] = useState(false);
 
-  const devise = deviseDeType(type);
+  const total = totalSaisie(lignes);
+
+  function changerDevise(nouvelle: Devise) {
+    setDevise(nouvelle);
+    setLignes((actuelles) =>
+      actuelles.map((ligne) => ({
+        ...ligne,
+        type: convertirDevise(ligne.type, nouvelle) ?? "",
+      }))
+    );
+  }
 
   async function soumettre(e: React.FormEvent) {
     e.preventDefault();
     setErreur("");
+
+    if (lignes.some((ligne) => !ligne.type)) {
+      setErreur("Choisissez une contribution pour chaque ligne.");
+      return;
+    }
+    if (lignes.some((ligne) => !(Number(ligne.montant) > 0))) {
+      setErreur("Indiquez un montant pour chaque contribution.");
+      return;
+    }
+
     setEnCours(true);
     try {
       const res = await fetch("/api/operations", {
@@ -556,8 +591,10 @@ function AjoutModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nom,
-          montant,
-          type,
+          lignes: lignes.map((ligne) => ({
+            type: ligne.type,
+            montant: ligne.montant,
+          })),
           methode,
           projetId: projetId || null,
           note,
@@ -581,7 +618,7 @@ function AjoutModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
       <form
         onSubmit={soumettre}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 p-6"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 p-6"
       >
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -611,21 +648,6 @@ function AjoutModal({
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="label" htmlFor="aj-montant">Montant (en {devise}) *</label>
-              <input
-                id="aj-montant"
-                className="input"
-                type="number"
-                required
-                min={1}
-                step="any"
-                value={montant}
-                onChange={(e) =>
-                  setMontant(e.target.value === "" ? "" : Number(e.target.value))
-                }
-              />
-            </div>
-            <div>
               <label className="label" htmlFor="aj-date">Date</label>
               <input
                 id="aj-date"
@@ -633,14 +655,6 @@ function AjoutModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="label" htmlFor="aj-type">Type</label>
-              <SelectTypeOffrande
-                id="aj-type"
-                value={type}
-                onChange={(code) => setType(code as TypeOffrande)}
               />
             </div>
             <div>
@@ -656,6 +670,19 @@ function AjoutModal({
                 ))}
               </select>
             </div>
+          </div>
+          <div>
+            <span className="label">Devise</span>
+            <SelecteurDevise valeur={devise} onChange={changerDevise} />
+          </div>
+          <div>
+            <p className="label">Contributions *</p>
+            <LignesOffrande
+              lignes={lignes}
+              onChange={setLignes}
+              devise={devise}
+              idPrefix="ajout"
+            />
           </div>
           <div>
             <label className="label" htmlFor="aj-projet">Projet</label>
@@ -690,7 +717,11 @@ function AjoutModal({
               Annuler
             </button>
             <button type="submit" disabled={enCours} className="btn btn-primary">
-              {enCours ? "Enregistrement…" : "Enregistrer"}
+              {enCours
+                ? "Enregistrement…"
+                : total > 0
+                ? `Enregistrer ${formatMontantDevise(total, devise)}`
+                : "Enregistrer"}
             </button>
           </div>
         </div>

@@ -34,6 +34,12 @@ export interface Donateur {
   creeLe: string;
 }
 
+/** Une contribution parmi celles d'une même opération (un seul paiement). */
+export interface LigneOffrande {
+  type: TypeOffrande;
+  montant: number;
+}
+
 export interface Operation {
   id: string;
   numeroRecu: string;
@@ -46,6 +52,12 @@ export interface Operation {
   projetId?: string | null;
   note?: string;
   creePar?: string;
+  /**
+   * Détail de l'opération lorsque le donateur a soutenu plusieurs
+   * contributions en un seul paiement. Absent = une seule contribution
+   * (colonnes `type` et `montant`).
+   */
+  lignes?: LigneOffrande[];
 }
 
 export interface Projet {

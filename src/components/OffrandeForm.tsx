@@ -9,29 +9,36 @@ import {
   Printer,
   UserRound,
 } from "lucide-react";
-import type { Operation, Projet, TypeOffrande, MethodePaiement } from "@/lib/types";
-import { LIBELLES_METHODE } from "@/lib/types";
-import { deviseDeType } from "@/lib/offrandes";
+import type {
+  MethodePaiement,
+  Operation,
+  Projet,
+  TypeOffrande,
+} from "@/lib/types";
+import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
+import { convertirDevise, deviseDeType } from "@/lib/offrandes";
 import type { Devise } from "@/lib/offrandes";
-import { SelectTypeOffrande } from "@/components/SelectTypeOffrande";
+import {
+  LignesOffrande,
+  SelecteurDevise,
+  totalSaisie,
+} from "@/components/LignesOffrande";
+import type { LigneSaisie } from "@/components/LignesOffrande";
 import { formatMontantDevise } from "@/lib/format";
 
 interface Props {
   projetInitial?: string;
 }
 
-const MONTANTS_RAPIDES: Record<Devise, number[]> = {
-  USD: [5, 10, 20, 50, 100],
-  CDF: [500, 1000, 5000, 10000, 50000],
-};
-
 export function OffrandeForm({ projetInitial }: Props) {
   const [projets, setProjets] = useState<Projet[]>([]);
   const [nom, setNom] = useState("");
   const [telephone, setTelephone] = useState("");
   const [email, setEmail] = useState("");
-  const [type, setType] = useState<TypeOffrande>("offrande");
-  const [montant, setMontant] = useState<number | "">("");
+  const [devise, setDevise] = useState<Devise>("USD");
+  const [lignes, setLignes] = useState<LigneSaisie[]>([
+    { type: "offrande", montant: "" },
+  ]);
   const [methode, setMethode] = useState<MethodePaiement>("especes");
   const [projetId, setProjetId] = useState<string>(projetInitial ?? "");
   const [note, setNote] = useState("");
@@ -42,8 +49,7 @@ export function OffrandeForm({ projetInitial }: Props) {
   const [erreur, setErreur] = useState("");
   const [resultat, setResultat] = useState<Operation | null>(null);
 
-  const devise = deviseDeType(type);
-  const montantsRapides = MONTANTS_RAPIDES[devise];
+  const total = totalSaisie(lignes);
 
   useEffect(() => {
     fetch("/api/projets")
@@ -52,10 +58,32 @@ export function OffrandeForm({ projetInitial }: Props) {
       .catch(() => setProjets([]));
   }, []);
 
+  function changerDevise(nouvelle: Devise) {
+    setDevise(nouvelle);
+    setLignes((actuelles) =>
+      actuelles.map((ligne) => ({
+        ...ligne,
+        type: convertirDevise(ligne.type, nouvelle) ?? "",
+      }))
+    );
+  }
+
   async function soumettre(e: React.FormEvent) {
     e.preventDefault();
     setErreur("");
     setEnCours(true);
+
+    if (lignes.some((ligne) => !ligne.type)) {
+      setErreur("Choisissez une contribution pour chaque ligne.");
+      setEnCours(false);
+      return;
+    }
+    if (lignes.some((ligne) => !(Number(ligne.montant) > 0))) {
+      setErreur("Indiquez un montant pour chaque contribution.");
+      setEnCours(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/operations", {
         method: "POST",
@@ -64,8 +92,10 @@ export function OffrandeForm({ projetInitial }: Props) {
           nom,
           telephone,
           email,
-          type,
-          montant,
+          lignes: lignes.map((ligne) => ({
+            type: ligne.type,
+            montant: ligne.montant,
+          })),
           methode,
           projetId: projetId || null,
           note,
@@ -88,6 +118,11 @@ export function OffrandeForm({ projetInitial }: Props) {
   }
 
   if (resultat) {
+    const contributions = resultat.lignes ?? [];
+    const deviseResultat = deviseDeType(
+      contributions[0]?.type ?? resultat.type
+    );
+
     return (
       <div className="text-center">
         <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
@@ -99,11 +134,27 @@ export function OffrandeForm({ projetInitial }: Props) {
         <p className="mt-2 text-slate-600 dark:text-slate-300">
           Votre contribution de{" "}
           <strong className="text-brand-700 dark:text-brand-300">
-            {formatMontantDevise(resultat.montant, deviseDeType(resultat.type))}
+            {formatMontantDevise(resultat.montant, deviseResultat)}
           </strong>{" "}
-          a
-          bien été enregistrée.
+          a bien été enregistrée.
         </p>
+        {contributions.length > 1 && (
+          <ul className="mx-auto mt-4 max-w-xs space-y-1 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-left text-sm">
+            {contributions.map((ligne) => (
+              <li
+                key={ligne.type}
+                className="flex justify-between gap-3 text-slate-600 dark:text-slate-300"
+              >
+                <span className="min-w-0 truncate">
+                  {LIBELLES_TYPE[ligne.type as TypeOffrande]}
+                </span>
+                <span className="tabular shrink-0 font-semibold">
+                  {formatMontantDevise(ligne.montant, deviseResultat)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/15 px-5 py-2 font-mono text-sm font-bold text-brand-700 dark:text-brand-300">
           Reçu n° {resultat.numeroRecu}
         </div>
@@ -166,12 +217,8 @@ export function OffrandeForm({ projetInitial }: Props) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="label" htmlFor="type">Type de contribution </label>
-          <SelectTypeOffrande
-            id="type"
-            value={type}
-            onChange={(code) => setType(code as TypeOffrande)}
-          />
+          <span className="label">Devise</span>
+          <SelecteurDevise valeur={devise} onChange={changerDevise} />
         </div>
         <div>
           <label className="label" htmlFor="methode">Méthode de paiement </label>
@@ -189,36 +236,19 @@ export function OffrandeForm({ projetInitial }: Props) {
       </div>
 
       <div>
-        <label className="label" htmlFor="montant">Montant (en {devise}) </label>
-        <input
-          id="montant"
-          className="input"
-          type="number"
-          required
-          min={1}
-          step="any"
-          value={montant}
-          onChange={(e) =>
-            setMontant(e.target.value === "" ? "" : Number(e.target.value))
-          }
-          placeholder="0"
+        <p className="label">
+          Vos contributions
+        </p>
+        <p className="-mt-1 mb-2 text-xs text-slate-500 dark:text-slate-400">
+          Un même paiement peut soutenir plusieurs types d&apos;offrande :
+          ajoutez une ligne par contribution.
+        </p>
+        <LignesOffrande
+          lignes={lignes}
+          onChange={setLignes}
+          devise={devise}
+          idPrefix="offrande"
         />
-        <div className="mt-2 flex flex-wrap gap-2">
-          {montantsRapides.map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setMontant(m)}
-              className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
-                montant === m
-                  ? "border-brand-600 bg-brand-600 text-white"
-                  : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-brand-400"
-              }`}
-            >
-              {m} {devise}
-            </button>
-          ))}
-        </div>
       </div>
 
       <div>
@@ -304,10 +334,7 @@ export function OffrandeForm({ projetInitial }: Props) {
         ) : (
           <>
             <Heart size={18} />
-            Donner{" "}
-            {typeof montant === "number" && montant > 0
-              ? formatMontantDevise(montant, devise)
-              : ""}
+            Donner {total > 0 ? formatMontantDevise(total, devise) : ""}
           </>
         )}
       </button>

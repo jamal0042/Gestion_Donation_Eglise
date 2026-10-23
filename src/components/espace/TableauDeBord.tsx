@@ -14,6 +14,7 @@ import {
 import type { Operation, Projet, TypeOffrande } from "@/lib/types";
 import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
 import { deviseDeType } from "@/lib/offrandes";
+import { libelleOperation } from "@/components/TypeContribution";
 import { formatDateCourte, formatMontant, formatMontantDevise } from "@/lib/format";
 
 interface Espace {
@@ -271,7 +272,7 @@ export function TableauDeBord() {
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
-                      {LIBELLES_TYPE[o.type]}
+                      {libelleOperation(o)}
                       {o.projetId ? " · projet" : ""}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">

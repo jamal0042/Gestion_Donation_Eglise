@@ -164,6 +164,70 @@ export function estCodeOffrande(code: string): code is CodeOffrande {
   return Object.prototype.hasOwnProperty.call(LIBELLES_TYPE, code);
 }
 
+export const MONTANTS_RAPIDES: Record<Devise, number[]> = {
+  USD: [5, 10, 20, 50, 100],
+  CDF: [500, 1000, 5000, 10000, 50000],
+};
+
+/** Devise d'une offre du catalogue (les contributions historiques sont en USD). */
+export function deviseDeItem(item: OffrandeItem): Devise {
+  return item.devise ?? "USD";
+}
+
+/** Offres disponibles dans une devise donnée. */
+export function itemsParDevise(devise: Devise): OffrandeItem[] {
+  return ITEMS_OFFRANDES.filter((item) => deviseDeItem(item) === devise);
+}
+
+/** Mêmes groupes que GROUPES_OFFRANDES, limités à une devise. */
+export function groupesParDevise(
+  devise: Devise
+): { famille: string; items: OffrandeItem[] }[] {
+  return GROUPES_OFFRANDES.map((groupe) => ({
+    famille: groupe.famille,
+    items: groupe.items.filter((item) => deviseDeItem(item) === devise),
+  })).filter((groupe) => groupe.items.length > 0);
+}
+
+/**
+ * Bascule un code vers une autre devise (`zaka_cdf` -> `zaka_usd`).
+ * Renvoie null quand la bascule est impossible (contributions historiques
+ * uniquement en USD).
+ */
+export function convertirDevise(code: string, devise: Devise): string | null {
+  if (!code) return "";
+  const base = code.replace(/_(cdf|usd)$/, "");
+  if (base !== code) {
+    const cible = `${base}_${devise.toLowerCase()}`;
+    return estCodeOffrande(cible) ? cible : null;
+  }
+  return devise === "USD" ? code : null;
+}
+
+export interface LigneMontant {
+  type: string;
+  montant: number;
+}
+
+/**
+ * Détail d'une opération : ses lignes si elle en a, sinon sa contribution
+ * unique (`type` + `montant`).
+ */
+export function detailOperation(operation: {
+  type: string;
+  montant: number;
+  lignes?: LigneMontant[];
+}): LigneMontant[] {
+  return operation.lignes && operation.lignes.length > 0
+    ? operation.lignes
+    : [{ type: operation.type, montant: operation.montant }];
+}
+
+/** Somme des contributions d'une opération. */
+export function totalLignes(lignes: LigneMontant[]): number {
+  return lignes.reduce((total, ligne) => total + ligne.montant, 0);
+}
+
 /** Totaux séparés par devise (les deux montants ne sont jamais additionnés). */
 export function totalParDevise(
   operations: { type: string; montant: number }[]

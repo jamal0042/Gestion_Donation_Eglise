@@ -17,6 +17,8 @@ interface Props {
 
 export function Recu({ operation, projetNom }: Props) {
   const devise = deviseDeType(operation.type);
+  const lignes = operation.lignes ?? [];
+  const plusieurs = lignes.length > 1;
 
   return (
     <div className="print-area mx-auto max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -69,7 +71,9 @@ export function Recu({ operation, projetNom }: Props) {
               Type de contribution
             </p>
             <p className="mt-1 font-semibold text-slate-800">
-              {LIBELLES_TYPE[operation.type]}
+              {plusieurs
+                ? `${lignes.length} contributions`
+                : LIBELLES_TYPE[operation.type]}
             </p>
           </div>
           <div>
@@ -98,11 +102,36 @@ export function Recu({ operation, projetNom }: Props) {
           )}
         </div>
 
+        {plusieurs && (
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Détail des contributions
+            </p>
+            <table className="mt-2 w-full text-[13px]">
+              <tbody>
+                {lignes.map((ligne) => (
+                  <tr
+                    key={ligne.type}
+                    className="border-b border-dashed border-slate-200 last:border-0"
+                  >
+                    <td className="py-1.5 pr-3 text-slate-700">
+                      {LIBELLES_TYPE[ligne.type]}
+                    </td>
+                    <td className="tabular py-1.5 text-right font-semibold text-slate-900">
+                      {formatMontantDevise(ligne.montant, devise)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         <div className="mt-6 rounded-xl bg-brand-50 p-5">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-brand-500">
-                Montant versé
+                {plusieurs ? "Total versé" : "Montant versé"}
               </p>
               <p className="mt-1 text-3xl font-extrabold text-brand-800">
                 {formatMontantDevise(operation.montant, devise)}

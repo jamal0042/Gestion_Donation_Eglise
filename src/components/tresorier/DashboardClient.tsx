@@ -15,6 +15,7 @@ import {
 import type { Operation, Projet } from "@/lib/types";
 import { LIBELLES_TYPE } from "@/lib/types";
 import { deviseDeType } from "@/lib/offrandes";
+import { libelleOperation } from "@/components/TypeContribution";
 import { formatDateCourte, formatMontant, formatMontantDevise } from "@/lib/format";
 
 interface Stats {
@@ -221,7 +222,7 @@ export function DashboardClient() {
                       {o.donateurNom}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-                      {formatDateCourte(o.date)} · {LIBELLES_TYPE[o.type]} ·{" "}
+                      {formatDateCourte(o.date)} · {libelleOperation(o)} ·{" "}
                       <span className="font-mono">{o.numeroRecu}</span>
                     </p>
                   </div>
@@ -272,7 +273,7 @@ export function DashboardClient() {
                     <td className="max-w-[220px] truncate font-medium text-slate-800 dark:text-slate-200">
                       {o.donateurNom}
                     </td>
-                    <td>{LIBELLES_TYPE[o.type]}</td>
+                    <td>{libelleOperation(o)}</td>
                     <td className="tabular text-right font-bold text-slate-900 dark:text-slate-100">
                       {formatMontantDevise(o.montant, deviseDeType(o.type))}
                     </td>

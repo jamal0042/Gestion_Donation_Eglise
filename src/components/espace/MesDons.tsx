@@ -11,9 +11,10 @@ import {
   Search,
   X,
 } from "lucide-react";
-import type { Operation, Projet } from "@/lib/types";
+import type { Operation, Projet, TypeOffrande } from "@/lib/types";
 import { LIBELLES_METHODE, LIBELLES_TYPE } from "@/lib/types";
-import { deviseDeType, totalParDevise } from "@/lib/offrandes";
+import { detailOperation, deviseDeType, totalParDevise } from "@/lib/offrandes";
+import { TypeContribution, libelleOperation } from "@/components/TypeContribution";
 import { SelectTypeOffrande } from "@/components/SelectTypeOffrande";
 import { formatDateCourte, formatMontantDevise } from "@/lib/format";
 
@@ -51,7 +52,12 @@ export function MesDons() {
           o.numeroRecu.toLowerCase().includes(ql) ||
           (o.note ?? "").toLowerCase().includes(ql)
       );
-    if (type) liste = liste.filter((o) => o.type === type);
+    if (type)
+      liste = liste.filter(
+        (o) =>
+          o.type === type ||
+          (o.lignes ?? []).some((ligne) => ligne.type === type)
+      );
     if (projetId) liste = liste.filter((o) => o.projetId === projetId);
     if (du) liste = liste.filter((o) => new Date(o.date) >= new Date(du));
     if (au) {
@@ -92,18 +98,24 @@ export function MesDons() {
       "Méthode",
       "Projet",
       "Montant",
+      "Total du reçu",
       "Note",
     ];
-    const lignes = filtrees.map((o) => [
-      o.numeroRecu,
-      new Date(o.date).toISOString().slice(0, 10),
-      LIBELLES_TYPE[o.type],
-      deviseDeType(o.type),
-      LIBELLES_METHODE[o.methode],
-      `"${projets.find((p) => p.id === o.projetId)?.nom ?? ""}"`,
-      o.montant,
-      `"${(o.note ?? "").replace(/\n/g, " ")}"`,
-    ]);
+    const lignes = filtrees.flatMap((o) => {
+      const projet = `"${projets.find((p) => p.id === o.projetId)?.nom ?? ""}"`;
+      const note = `"${(o.note ?? "").replace(/\n/g, " ")}"`;
+      return detailOperation(o).map((ligne) => [
+        o.numeroRecu,
+        new Date(o.date).toISOString().slice(0, 10),
+        LIBELLES_TYPE[ligne.type as TypeOffrande],
+        deviseDeType(ligne.type),
+        LIBELLES_METHODE[o.methode],
+        projet,
+        ligne.montant,
+        o.montant,
+        note,
+      ]);
+    });
     const csv = [enTete, ...lignes].map((l) => l.join(";")).join("\n");
     const url = URL.createObjectURL(
       new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })
@@ -281,7 +293,7 @@ export function MesDons() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
-                      {LIBELLES_TYPE[o.type]}
+                      {libelleOperation(o)}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
                       {formatDateCourte(o.date)} ·{" "}
@@ -353,9 +365,7 @@ export function MesDons() {
                       {o.numeroRecu}
                     </td>
                     <td>
-                      <span className="chip bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                        {LIBELLES_TYPE[o.type]}
-                      </span>
+                      <TypeContribution operation={o} />
                     </td>
                     <td className="max-w-[160px] truncate text-slate-500 dark:text-slate-400">
                       {projets.find((p) => p.id === o.projetId)?.nom ?? "—"}

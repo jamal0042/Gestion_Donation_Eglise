@@ -1,12 +1,18 @@
 import type {
   Donateur,
+  LigneOffrande,
   Operation,
   Projet,
   Role,
   TypeOffrande,
   Utilisateur,
 } from "./types";
-import { deviseDeType } from "./offrandes";
+import {
+  detailOperation,
+  deviseDeType,
+  estCodeOffrande,
+  totalLignes,
+} from "./offrandes";
 import type { Devise } from "./offrandes";
 import type { Database } from "./database.types";
 import { creerClientAdmin } from "./supabase/server";
@@ -16,7 +22,23 @@ type LigneDonateur = Database["public"]["Tables"]["donateurs"]["Row"];
 type LigneProjet = Database["public"]["Tables"]["projets"]["Row"];
 type LigneProfil = Database["public"]["Tables"]["profils"]["Row"];
 
+/** Relit le détail jsonb d'une opération en ignorant les entrées invalides. */
+function versLignes(valeur: unknown): LigneOffrande[] | undefined {
+  if (!Array.isArray(valeur)) return undefined;
+  const lignes: LigneOffrande[] = [];
+  for (const entree of valeur) {
+    if (!entree || typeof entree !== "object") continue;
+    const { type, montant } = entree as { type?: unknown; montant?: unknown };
+    const nombre = Number(montant);
+    if (typeof type !== "string" || !estCodeOffrande(type)) continue;
+    if (!Number.isFinite(nombre) || nombre <= 0) continue;
+    lignes.push({ type, montant: nombre });
+  }
+  return lignes.length > 0 ? lignes : undefined;
+}
+
 function versOperation(ligne: LigneOperation): Operation {
+  const lignes = versLignes(ligne.lignes);
   return {
     id: ligne.id,
     numeroRecu: ligne.numero_recu,
@@ -29,6 +51,7 @@ function versOperation(ligne: LigneOperation): Operation {
     projetId: ligne.projet_id,
     note: ligne.note ?? undefined,
     creePar: ligne.cree_par ?? undefined,
+    ...(lignes ? { lignes } : {}),
   };
 }
 
@@ -108,19 +131,32 @@ export async function ajouterOperation(
   input: Omit<Operation, "id" | "numeroRecu"> & { numeroRecu?: string }
 ): Promise<Operation> {
   const supabase = creerClientAdmin();
+
+  const lignes = (input.lignes ?? []).filter(
+    (ligne) => Number(ligne.montant) > 0
+  );
+  const principale = lignes.reduce<LigneOffrande | null>(
+    (plus, ligne) => (!plus || ligne.montant > plus.montant ? ligne : plus),
+    null
+  );
+
   const { data, error } = await supabase
     .from("operations")
     .insert({
       numero_recu: input.numeroRecu,
       date: input.date,
-      montant: input.montant,
-      type: input.type,
+      montant: lignes.length > 0 ? totalLignes(lignes) : input.montant,
+      type: principale?.type ?? input.type,
       methode: input.methode,
       donateur_id: input.donateurId,
       donateur_nom: input.donateurNom,
       projet_id: input.projetId ?? null,
       note: input.note ?? null,
       cree_par: input.creePar ?? null,
+      lignes: lignes.map((ligne) => ({
+        type: ligne.type,
+        montant: ligne.montant,
+      })),
     })
     .select("*")
     .single();
@@ -380,14 +416,17 @@ export async function getStatistiques(): Promise<Statistiques> {
     { type: TypeOffrande; total: number; nombre: number }
   >();
   for (const o of operations) {
-    const courant = parTypeMap.get(o.type) ?? {
-      type: o.type,
-      total: 0,
-      nombre: 0,
-    };
-    courant.total += o.montant;
-    courant.nombre += 1;
-    parTypeMap.set(o.type, courant);
+    for (const ligne of detailOperation(o)) {
+      const type = ligne.type as TypeOffrande;
+      const courant = parTypeMap.get(type) ?? {
+        type,
+        total: 0,
+        nombre: 0,
+      };
+      courant.total += ligne.montant;
+      courant.nombre += 1;
+      parTypeMap.set(type, courant);
+    }
   }
 
   return {

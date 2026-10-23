@@ -18,8 +18,8 @@ import {
   reinitialiserCollecte,
   trouverOuCreerDonateur,
 } from "@/lib/store";
-import type { MethodePaiement, TypeOffrande } from "@/lib/types";
-import { estCodeOffrande } from "@/lib/offrandes";
+import type { LigneOffrande, MethodePaiement, TypeOffrande } from "@/lib/types";
+import { deviseDeType, estCodeOffrande } from "@/lib/offrandes";
 
 const METHODES: MethodePaiement[] = [
   "especes",
@@ -27,6 +27,56 @@ const METHODES: MethodePaiement[] = [
   "virement",
   "cheque",
 ];
+
+const MAX_LIGNES = 20;
+
+interface LigneBrute {
+  type?: unknown;
+  montant?: unknown;
+}
+
+/**
+ * Valide et normalise les contributions d'un don. Un paiement peut couvrir
+ * plusieurs types d'offrande, mais toujours dans une seule devise.
+ */
+function normaliserLignes(
+  body: { lignes?: LigneBrute[]; type?: string; montant?: number }
+): { lignes: LigneOffrande[] } | { erreur: string } {
+  const brutes: LigneBrute[] =
+    Array.isArray(body.lignes) && body.lignes.length > 0
+      ? body.lignes
+      : [{ type: body.type, montant: body.montant }];
+
+  if (brutes.length > MAX_LIGNES) {
+    return { erreur: `Un don ne peut pas dépasser ${MAX_LIGNES} contributions.` };
+  }
+
+  const cumul = new Map<TypeOffrande, number>();
+  for (const brute of brutes) {
+    const type = typeof brute?.type === "string" ? brute.type : "";
+    const montant = Number(brute?.montant);
+    if (!estCodeOffrande(type)) return { erreur: "Type d'offrande invalide." };
+    if (!Number.isFinite(montant) || montant <= 0) {
+      return { erreur: "Chaque contribution doit avoir un montant supérieur à 0." };
+    }
+    cumul.set(type, (cumul.get(type) ?? 0) + Math.round(montant * 100) / 100);
+  }
+
+  const lignes: LigneOffrande[] = [...cumul].map(([type, montant]) => ({
+    type,
+    montant,
+  }));
+
+  const devises = new Set(lignes.map((ligne) => deviseDeType(ligne.type)));
+  if (devises.size > 1) {
+    return {
+      erreur:
+        "Toutes les contributions d'un même don doivent être dans la même devise (CDF ou USD).",
+    };
+  }
+
+  return { lignes };
+}
 
 export async function GET(request: NextRequest) {
   if (!serviceRoleConfigure()) return erreurConfigurationSupabase();
@@ -60,7 +110,11 @@ export async function GET(request: NextRequest) {
 
   const type = sp.get("type");
   if (type && estCodeOffrande(type)) {
-    operations = operations.filter((o) => o.type === type);
+    operations = operations.filter(
+      (o) =>
+        o.type === type ||
+        (o.lignes ?? []).some((ligne) => ligne.type === type)
+    );
   }
 
   const methode = sp.get("methode");
@@ -107,6 +161,7 @@ export async function POST(request: Request) {
     email?: string;
     montant?: number;
     type?: string;
+    lignes?: LigneBrute[];
     methode?: string;
     projetId?: string | null;
     note?: string;
@@ -117,14 +172,14 @@ export async function POST(request: Request) {
   if (!body) return erreur("Corps de requête invalide.");
 
   const nom = body.nom?.trim() ?? "";
-  const montant = Number(body.montant);
-  const type = body.type as TypeOffrande;
   const methode = body.methode as MethodePaiement;
 
   if (nom.length < 2) return erreur("Veuillez indiquer votre nom complet.");
-  if (!Number.isFinite(montant) || montant <= 0)
-    return erreur("Le montant doit être supérieur à 0.");
-  if (!estCodeOffrande(type)) return erreur("Type d'offrande invalide.");
+  const contributions = normaliserLignes(body);
+  if ("erreur" in contributions) return erreur(contributions.erreur);
+  const { lignes } = contributions;
+  if (lignes.length === 0)
+    return erreur("Indiquez au moins une contribution.");
   if (!METHODES.includes(methode)) return erreur("Méthode de paiement invalide.");
 
   const donateur = await trouverOuCreerDonateur({
@@ -137,8 +192,9 @@ export async function POST(request: Request) {
   try {
     operation = await ajouterOperation({
       date: body.date ? new Date(body.date).toISOString() : new Date().toISOString(),
-      montant,
-      type,
+      montant: lignes.reduce((total, ligne) => total + ligne.montant, 0),
+      type: lignes[0].type,
+      lignes,
       methode,
       donateurId: donateur.id,
       donateurNom: donateur.nom,
@@ -151,6 +207,12 @@ export async function POST(request: Request) {
     if (message.includes("invalid input value for enum")) {
       return erreur(
         "Ce type d'offrande n'est pas encore activé dans la base. Exécutez la migration supabase/migrations/0002_types_offrande.sql dans Supabase.",
+        400
+      );
+    }
+    if (message.includes("lignes")) {
+      return erreur(
+        "Le détail multi-contributions n'est pas encore activé dans la base. Exécutez la migration supabase/migrations/0003_lignes_offrande.sql dans Supabase.",
         400
       );
     }

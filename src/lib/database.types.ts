@@ -106,6 +106,7 @@ export type Database = {
           projet_id: string | null;
           note: string | null;
           cree_par: string | null;
+          lignes: Json;
           cree_le: string;
         };
         Insert: {
@@ -120,6 +121,7 @@ export type Database = {
           projet_id?: string | null;
           note?: string | null;
           cree_par?: string | null;
+          lignes?: Json;
           cree_le?: string;
         };
         Update: {
@@ -134,6 +136,7 @@ export type Database = {
           projet_id?: string | null;
           note?: string | null;
           cree_par?: string | null;
+          lignes?: Json;
           cree_le?: string;
         };
         Relationships: [];

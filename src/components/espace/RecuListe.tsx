@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, Printer } from "lucide-react";
 import type { Operation } from "@/lib/types";
-import { LIBELLES_TYPE } from "@/lib/types";
 import { deviseDeType } from "@/lib/offrandes";
+import { TypeContribution } from "@/components/TypeContribution";
 import { formatDate, formatMontantDevise } from "@/lib/format";
 
 export function RecuListe() {
@@ -57,9 +57,7 @@ export function RecuListe() {
                     {formatDate(o.date)}
                   </p>
                 </div>
-                <span className="chip bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                  {LIBELLES_TYPE[o.type]}
-                </span>
+                <TypeContribution operation={o} />
               </div>
               <p className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-slate-100">
                 {formatMontantDevise(o.montant, deviseDeType(o.type))}
