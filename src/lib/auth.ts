@@ -4,7 +4,7 @@ import {
   supabaseConfigure,
 } from "./supabase/server";
 import { trouverProfil } from "./store";
-import type { SessionPayload, Utilisateur } from "./types";
+import type { Role, SessionPayload, Utilisateur } from "./types";
 
 /**
  * Récupère la session courante en vérifiant le jeton auprès de Supabase Auth.
@@ -48,11 +48,12 @@ export async function getSession(): Promise<SessionPayload | null> {
     };
   }
 
+  const role = (profil.role as Role) ?? "membre";
   return {
     sub: profil.id,
     nom: profil.nom,
     email,
-    role: profil.role,
+    role,
     donateurId: profil.donateurId,
   };
 }

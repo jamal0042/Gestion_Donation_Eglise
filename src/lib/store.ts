@@ -1,9 +1,12 @@
 import type {
+  Contenu,
   Donateur,
   LigneOffrande,
+  MediaContenu,
   Operation,
   Projet,
   Role,
+  TypeContenu,
   TypeOffrande,
   Utilisateur,
 } from "./types";
@@ -439,4 +442,53 @@ export async function getStatistiques(): Promise<Statistiques> {
     parType: [...parTypeMap.values()].sort((a, b) => b.total - a.total),
     parDevise,
   };
+}
+
+
+function slugify(texte){
+  return String(texte||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,80);
+}
+function uniqueSlug(base){const s=base||"contenu";return s+"-"+Date.now().toString(36);}
+function versContenu(ligne){
+  const media=Array.isArray(ligne.media)?ligne.media:[];
+  const tags=Array.isArray(ligne.tags)?ligne.tags:[];
+  return {id:ligne.id,titre:ligne.titre,slug:ligne.slug,type:ligne.type,resume:ligne.resume??null,corps:ligne.corps??null,orateur:ligne.orateur??null,dateEvenement:ligne.date_evenement??null,media,tags,publie:!!ligne.publie,publieLe:ligne.publie_le??null,auteurId:ligne.auteur_id??null,auteurNom:ligne.auteur_nom??null,creeLe:ligne.cree_le,majLe:ligne.maj_le};
+}
+export async function getContenusPublies(filtre){
+  const supabase=creerClientAdmin();
+  let req=supabase.from("contenus").select("*").eq("publie",true).order("date_evenement",{ascending:false,nullsFirst:false}).order("publie_le",{ascending:false});
+  if(filtre&&filtre.type) req=req.eq("type",filtre.type);
+  const res=await req;
+  if(res.error) throw new Error(res.error.message);
+  return (res.data||[]).map(versContenu);
+}
+export async function getContenuBySlug(slug){
+  const supabase=creerClientAdmin();
+  const res=await supabase.from("contenus").select("*").eq("slug",slug).maybeSingle();
+  if(res.error) throw new Error(res.error.message);
+  return res.data?versContenu(res.data):null;
+}
+export async function getContenu(id){
+  const supabase=creerClientAdmin();
+  const res=await supabase.from("contenus").select("*").eq("id",id).maybeSingle();
+  if(res.error) throw new Error(res.error.message);
+  return res.data?versContenu(res.data):null;
+}
+export async function getTousContenus(){
+  const supabase=creerClientAdmin();
+  const res=await supabase.from("contenus").select("*").order("cree_le",{ascending:false});
+  if(res.error) throw new Error(res.error.message);
+  return (res.data||[]).map(versContenu);
+}
+export async function enregistrerContenu(input){
+  const supabase=creerClientAdmin();
+  const baseSlug=slugify((input.titre||""));
+  const valeurs={titre:input.titre||"",slug:input.slug||baseSlug||uniqueSlug(baseSlug),type:input.type||"predication",resume:input.resume||null,corps:input.corps||null,orateur:input.orateur||null,date_evenement:input.dateEvenement||null,media:input.media||[],tags:input.tags||[],publie:!!input.publie,auteur_id:input.auteurId||null,auteur_nom:input.auteurNom||null};
+  if(input.id){const res=await supabase.from("contenus").update(valeurs).eq("id",input.id).select("*").single();if(res.error)throw new Error(res.error.message);return versContenu(res.data);}
+  const res=await supabase.from("contenus").insert(valeurs).select("*").single();if(res.error)throw new Error(res.error.message);return versContenu(res.data);
+}
+export async function supprimerContenu(id){
+  const supabase=creerClientAdmin();
+  const res=await supabase.from("contenus").delete().eq("id",id);
+  if(res.error) throw new Error(res.error.message);
 }

@@ -154,7 +154,7 @@ export type Database = {
       };
     };
     Enums: {
-      role: "tresorier" | "membre";
+      role: "tresorier" | "membre" | "communication";
       type_offrande:
         | "dime"
         | "offrande"

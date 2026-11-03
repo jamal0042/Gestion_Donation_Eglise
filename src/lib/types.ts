@@ -3,7 +3,7 @@ import { LIBELLES_TYPE as LIBELLES_OFFRANDES } from "./offrandes";
 
 export type { CodeOffrande };
 
-export type Role = "tresorier" | "membre";
+export type Role = "tresorier" | "membre" | "communication";
 
 export type TypeOffrande = CodeOffrande;
 
